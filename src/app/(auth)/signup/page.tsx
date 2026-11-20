@@ -1,4 +1,4 @@
-
+'use client'
 import Link from "next/link";
 import {
     User,
@@ -10,16 +10,20 @@ import {
     Users,
     UserRoundCheck,
     ShieldCheck,
+    EyeOff,
 } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { authClient } from "@/lib/auth-client";
-import { role } from "better-auth/plugins";
+import { redirect } from "next/navigation";
+import { toast } from "sonner";
+
 
 type Role = "vendor" | "customer";
 
 const RegisterPage = () => {
     const [role, setRole] = useState<Role>('vendor')
+    const [showPassword, setShowPassword] = useState(false);
 
     const handlesignup = async (e: React.SubmitEvent<HTMLElement>) => {
         e.preventDefault()
@@ -55,14 +59,24 @@ const RegisterPage = () => {
         }
         const formData = new FormData(e.target)
         const data = Object.fromEntries(formData.entries())
-        await authClient.signUp.email({
+        const { data: result, error } = await authClient.signUp.email({
             name: data.name as string,
             email: data.email as string,
             password: data.password as string,
-            image: imageUrl || undefined,
+            image: imageUrl,
             role: role,
             callbackURL: "/",
         })
+        if (error) {
+            toast.error(error.message || "Signup failed!");
+            return;
+        }
+
+        if (result) {
+            toast.success("Account created successfully!");
+
+            redirect('/')
+        }
 
     }
 
@@ -107,7 +121,7 @@ const RegisterPage = () => {
                     </div>
 
                     {/* Register Form */}
-                    <form className="space-y-3">
+                    <form onSubmit={handlesignup} className="space-y-3">
 
                         {/* Full Name */}
                         <div className="relative">
@@ -118,6 +132,8 @@ const RegisterPage = () => {
                             <input
                                 type="text"
                                 name="name"
+                                required
+                                minLength={2}
                                 placeholder="Full Name"
                                 className="h-11 w-full rounded-lg border border-orange-200 bg-white pl-10 pr-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                             />
@@ -132,6 +148,7 @@ const RegisterPage = () => {
                             <input
                                 type="email"
                                 name="email"
+                                required
                                 placeholder="Email Address"
                                 className="h-11 w-full rounded-lg border border-orange-200 bg-white pl-10 pr-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                             />
@@ -143,18 +160,26 @@ const RegisterPage = () => {
                                 size={17}
                                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700"
                             />
-
                             <input
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 name="password"
-                                placeholder="Password"
-                                className="h-11 w-full rounded-lg border border-orange-200 bg-white pl-10 pr-10 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
+                                required
+                                placeholder="Enter your password"
+                                className="h-11 w-full rounded-lg border border-orange-200 bg-white pl-10 pr-11 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                             />
 
-                            <Eye
-                                size={17}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
-                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 transition hover:text-red-600"
+                                aria-label={showPassword ? "Hide password" : "Show password"}
+                            >
+                                {showPassword ? (
+                                    <EyeOff size={17} />
+                                ) : (
+                                    <Eye size={17} />
+                                )}
+                            </button>
                         </div>
 
                         {/* Profile Image */}
@@ -165,8 +190,8 @@ const RegisterPage = () => {
                             />
 
                             <input
+                                id="sign-up-image"
                                 type="file"
-                                name="profileImage"
                                 accept="image/*"
                                 className="w-full cursor-pointer pl-2 text-xs text-gray-500 file:mr-2 file:h-10 file:cursor-pointer file:border-0 file:border-l file:border-orange-200 file:bg-orange-50 file:px-3 file:text-xs file:font-medium file:text-gray-700"
                             />
@@ -186,6 +211,8 @@ const RegisterPage = () => {
                                         type="radio"
                                         name="role"
                                         value="vendor"
+                                        checked={role === "vendor"}
+                                        onChange={() => setRole("vendor")}
                                         className="h-4 w-4 accent-red-600"
                                     />
 
@@ -204,11 +231,13 @@ const RegisterPage = () => {
                                 </label>
 
                                 {/* Customer */}
-                                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-orange-200 bg-white p-2.5 transition hover:border-red-300 hover:bg-red-50/50">
+                                <label className="flex cursor-pointer items-center gap-2 rounded-lg border-2 border-red-500 bg-white p-2.5 transition hover:border-red-300 hover:bg-red-50/50">
                                     <input
                                         type="radio"
                                         name="role"
                                         value="customer"
+                                        checked={role === "customer"}
+                                        onChange={() => setRole("customer")}
                                         className="h-4 w-4 accent-red-600"
                                     />
 
@@ -231,7 +260,7 @@ const RegisterPage = () => {
 
                         {/* Create Account Button */}
                         <button
-                            type="button"
+                            type="submit"
                             className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-sm font-bold text-white shadow-md shadow-red-500/20 transition hover:from-red-700 hover:to-red-800"
                         >
                             <UserRoundCheck size={17} />
@@ -254,9 +283,7 @@ const RegisterPage = () => {
                         type="button"
                         className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
                     >
-                        <span className="text-lg font-extrabold text-blue-600">
-                            G
-                        </span>
+                        <FcGoogle size={20} />
                         Continue with Google
                     </button>
 
@@ -264,7 +291,7 @@ const RegisterPage = () => {
                     <p className="mt-4 text-center text-xs text-gray-600">
                         Already have an account?{" "}
                         <Link
-                            href="/login"
+                            href="/signin"
                             className="font-bold text-red-600 hover:text-red-800"
                         >
                             Sign In
