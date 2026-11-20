@@ -92,7 +92,7 @@ const RegisterPage = () => {
 
         if (data) {
             toast.success("Google Sign Up Successfully!");
-           
+
         }
     }
 
@@ -181,6 +181,9 @@ const RegisterPage = () => {
                                 type={showPassword ? "text" : "password"}
                                 name="password"
                                 required
+                                minLength={6}
+                                pattern="(?=.*[a-z])(?=.*[A-Z]).{6,}"
+                                title="Password must be at least 6 characters and contain at least one uppercase and one lowercase letter."
                                 placeholder="Enter your password"
                                 className="h-11 w-full rounded-lg border border-orange-200 bg-white pl-10 pr-11 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-100"
                             />

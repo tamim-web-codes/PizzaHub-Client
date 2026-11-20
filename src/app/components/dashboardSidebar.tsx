@@ -79,8 +79,8 @@ const menuItems = {
         {
             title: "RESTAURANT",
             items: [
+                { title: "Add Menu Item", url: "/dashboard/vendor/add-menu-item", icon: Utensils },
                 { title: "My Menu Items", url: "/dashboard/restaurant", icon: Store },
-                { title: "Add Menu Item", url: "/dashboard/menu", icon: Utensils },
                 { title: "Customer Orders", url: "/dashboard/orders", icon: ShoppingBag },
             ],
         },

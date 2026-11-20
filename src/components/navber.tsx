@@ -148,7 +148,7 @@ const Navbar = () => {
                     </p>
 
                     <Link
-                        href="/dashboard"
+                        href={`/dashboard/${user?.role}`}
                         onClick={() => setIsOpen(false)}
                         className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-red-50 hover:text-red-700"
                     >
