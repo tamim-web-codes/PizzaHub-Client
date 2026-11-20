@@ -35,7 +35,7 @@ const Navbar = () => {
     const navLinks = [
         { name: "Home", href: "/" },
         { name: "Browse Menu", href: "/menu" },
-        { name: "Dashboard", href: "/dashboard" },
+        { name: "Dashboard", href: `/dashboard/${user?.role}` },
     ];
 
     const isActive = (href: string) => {
@@ -107,8 +107,8 @@ const Navbar = () => {
                 align="end"
                 sideOffset={12}
                 className={`overflow-hidden rounded-2xl border border-red-100 bg-white p-0 shadow-xl ${mobile
-                        ? "w-[calc(100vw-40px)] max-w-80"
-                        : "w-72"
+                    ? "w-[calc(100vw-40px)] max-w-80"
+                    : "w-72"
                     }`}
             >
                 {/* Profile Header */}
@@ -218,8 +218,8 @@ const Navbar = () => {
                                 key={link.name}
                                 href={link.href}
                                 className={`relative py-2 text-sm font-semibold transition-colors duration-300 hover:text-yellow-300 ${active
-                                        ? "text-yellow-300 after:absolute after:bottom-[-13px] after:left-0 after:h-[3px] after:w-full after:rounded-full after:bg-yellow-400"
-                                        : "text-white"
+                                    ? "text-yellow-300 after:absolute after:bottom-[-13px] after:left-0 after:h-[3px] after:w-full after:rounded-full after:bg-yellow-400"
+                                    : "text-white"
                                     }`}
                             >
                                 {link.name}
@@ -278,8 +278,8 @@ const Navbar = () => {
                                     href={link.href}
                                     onClick={() => setIsOpen(false)}
                                     className={`rounded-lg px-4 py-3 text-sm font-semibold transition ${active
-                                            ? "bg-white/15 text-yellow-300"
-                                            : "text-white hover:bg-white/10 hover:text-yellow-300"
+                                        ? "bg-white/15 text-yellow-300"
+                                        : "text-white hover:bg-white/10 hover:text-yellow-300"
                                         }`}
                                 >
                                     {link.name}

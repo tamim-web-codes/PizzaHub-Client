@@ -17,6 +17,7 @@ import React, { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
+import { FcGoogle } from "react-icons/fc";
 
 
 type Role = "vendor" | "customer";
@@ -79,6 +80,22 @@ const RegisterPage = () => {
         }
 
     }
+    const handlegooglesignup = async () => {
+        const { data, error } = await authClient.signIn.social({
+            provider: 'google',
+            callbackURL: '/'
+        })
+        if (error) {
+            toast.error(error.message || "Signup failed!");
+            return;
+        }
+
+        if (data) {
+            toast.success("Google Sign Up Successfully!");
+           
+        }
+    }
+
 
     return (
         <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-red-100 via-orange-50 to-red-100 px-4 py-8">
@@ -280,7 +297,7 @@ const RegisterPage = () => {
 
                     {/* Google Button */}
                     <button
-                        type="button"
+                        onClick={handlegooglesignup}
                         className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
                     >
                         <FcGoogle size={20} />

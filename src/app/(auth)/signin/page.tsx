@@ -12,9 +12,29 @@ import {
     ShieldCheck,
 } from "lucide-react";
 import React, { useState } from "react";
+import { FcGoogle } from "react-icons/fc";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 const SignInPage = () => {
     const [showPassword, setShowPassword] = useState(false);
+
+    const handlegooglesignin = async () => {
+        const { data, error } = await authClient.signIn.social({
+            provider: 'google',
+            callbackURL: '/'
+        })
+        if (error) {
+            toast.error(error.message || "Signup failed!");
+            return;
+        }
+
+        if (data) {
+            toast.success("Google Sign Up Successfully!");
+
+        }
+    }
+
 
     return (
         <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-red-100 via-orange-50 to-red-100 px-4 py-8">
@@ -131,7 +151,7 @@ const SignInPage = () => {
                                 />
                                 Remember me
                             </label>
-                     
+
                         </div>
 
                         {/* Sign In Button */}
@@ -158,19 +178,17 @@ const SignInPage = () => {
 
                     {/* Google Sign In */}
                     <button
-                        type="button"
+                        onClick={handlegooglesignin}
                         className="flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
                     >
-                        <span className="text-lg font-extrabold text-blue-600">
-                            G
-                        </span>
-
+                        <FcGoogle size={20} />
                         Continue with Google
                     </button>
 
+
                     {/* Register Link */}
                     <p className="mt-5 text-center text-xs text-gray-600">
-                        Don't have an account?{" "}
+                        Don`t have an account?{" "}
 
                         <Link
                             href="/signup"
