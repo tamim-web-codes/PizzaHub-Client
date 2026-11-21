@@ -36,3 +36,17 @@ const res = await fetch(`${BASE_URL}/edit-menu/${id}`,{
 }
 // http://localhost:5000/add-menu
 
+
+export const deletMenuItem = async(id:string)=>{
+const res = await fetch(`${BASE_URL}/delete-menu/${id}`,{
+    method:'DELETE',
+
+})
+
+  if (!res.ok) {
+    throw new Error("Failed to add menu item");
+  }
+ return res.json()
+}
+// http://localhost:5000/add-menu
+

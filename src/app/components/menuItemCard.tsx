@@ -18,6 +18,7 @@ import {
 
 import { TMenuItemData } from "@/components/types/type";
 import { MenuEditDialoag } from "./MenuEditDialoag";
+import { DeleteMenuItem } from "./MenuDeleteDialoag";
 
 type Props = {
     item: TMenuItemData;
@@ -138,14 +139,8 @@ const MenuItemCard = ({
                             <div className="grid grid-cols-3 gap-2">
 
                                 <MenuEditDialoag item={item} />
-                                <button
-                                    type="button"
-                                    onClick={() => onDelete?.(item._id)}
-                                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-                                >
-                                    <Trash2 size={15} />
-                                    Delete
-                                </button>
+
+                                <DeleteMenuItem item={item} />
 
                             </div>
                         </div>
