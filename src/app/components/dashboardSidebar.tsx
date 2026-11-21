@@ -80,7 +80,7 @@ const menuItems = {
             title: "RESTAURANT",
             items: [
                 { title: "Add Menu Item", url: "/dashboard/vendor/add-menu-item", icon: Utensils },
-                { title: "My Menu Items", url: "/dashboard/restaurant", icon: Store },
+                { title: "My Menu Items", url: "/dashboard/vendor/my-menu-items", icon: Store },
                 { title: "Customer Orders", url: "/dashboard/orders", icon: ShoppingBag },
             ],
         },
@@ -298,7 +298,7 @@ const DashboardSidebar = () => {
 
                 <div className="px-2 py-2 text-center group-data-[collapsible=icon]:hidden">
                     <p className="text-[10px] font-medium text-slate-400">
-                        © {new Date().getFullYear()} PizzaHub
+                        © 2026 PizzaHub
                     </p>
                 </div>
 
