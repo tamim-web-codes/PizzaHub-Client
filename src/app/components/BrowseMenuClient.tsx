@@ -264,11 +264,10 @@ const BrowseMenuClient = ({
                                 <Link
                                     href={createFilterUrl("category", "all")}
                                     scroll={false}
-                                    className={`rounded-full border px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
-                                        category === "all"
-                                            ? "border-red-600 bg-red-600 text-white shadow-md shadow-red-100"
-                                            : "border-slate-200 bg-white text-slate-600 hover:border-red-400 hover:bg-red-50 hover:text-red-600"
-                                    }`}
+                                    className={`rounded-full border px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${category === "all"
+                                        ? "border-red-600 bg-red-600 text-white shadow-md shadow-red-100"
+                                        : "border-slate-200 bg-white text-slate-600 hover:border-red-400 hover:bg-red-50 hover:text-red-600"
+                                        }`}
                                 >
                                     All
                                 </Link>
@@ -278,11 +277,10 @@ const BrowseMenuClient = ({
                                         key={item}
                                         href={createFilterUrl("category", item)}
                                         scroll={false}
-                                        className={`rounded-full border px-5 py-2.5 text-sm font-semibold capitalize transition-all duration-200 ${
-                                            category === item
-                                                ? "border-red-600 bg-red-600 text-white shadow-md shadow-red-100"
-                                                : "border-slate-200 bg-white text-slate-600 hover:border-red-400 hover:bg-red-50 hover:text-red-600"
-                                        }`}
+                                        className={`rounded-full border px-5 py-2.5 text-sm font-semibold capitalize transition-all duration-200 ${category === item
+                                            ? "border-red-600 bg-red-600 text-white shadow-md shadow-red-100"
+                                            : "border-slate-200 bg-white text-slate-600 hover:border-red-400 hover:bg-red-50 hover:text-red-600"
+                                            }`}
                                     >
                                         {item}
                                     </Link>
@@ -497,7 +495,7 @@ const BrowseMenuClient = ({
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.4 }}
-                        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                        className="grid grid-cols-2 items-stretch gap-3 sm:gap-5 lg:grid-cols-3 lg:gap-6"
                     >
                         {menuItems.map((item) => (
                             <MenuCard key={item._id} item={item} />

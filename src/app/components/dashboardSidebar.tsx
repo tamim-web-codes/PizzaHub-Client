@@ -73,7 +73,7 @@ const menuItems = {
         {
             title: "OVERVIEW",
             items: [
-                { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
+                { title: "Overview", url: "/dashboard/vendor/vendor-overview", icon: LayoutDashboard },
             ],
         },
         {
@@ -94,7 +94,7 @@ const menuItems = {
         {
             title: "ACCOUNT",
             items: [
-                { title: "My Profile Settings", url: "/dashboard/profile", icon: UserRound },
+                { title: "My Profile Settings", url: "/dashboard/vendor/profile", icon: UserRound },
 
             ],
         },

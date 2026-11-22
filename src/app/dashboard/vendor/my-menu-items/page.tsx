@@ -9,11 +9,12 @@ import MenuItemCard from "@/app/components/menuItemCard";
 import { myMenuItem } from "@/lib/api/myMenut";
 import { TMenuItemData } from "@/components/types/type";
 
+
 const MyMenuItem = async () => {
   let menuItems: TMenuItemData[] = [];
 
   try {
-    const result = await myMenuItem();
+    const result = await myMenuItem()
     menuItems = Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Failed to fetch menu items:", error);
@@ -33,7 +34,7 @@ const MyMenuItem = async () => {
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             My Menu Items
           </h1>
-        
+
         </div>
 
         <Link

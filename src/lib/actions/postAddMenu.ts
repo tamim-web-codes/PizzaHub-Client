@@ -50,3 +50,37 @@ const res = await fetch(`${BASE_URL}/delete-menu/${id}`,{
 }
 // http://localhost:5000/add-menu
 
+// ====================================================================================================
+
+export type ProfileUpdateData = {
+  name: string;
+  image?: string;
+};
+
+export const updateProfile = async (
+  userId: string,
+  data: ProfileUpdateData
+) => {
+  const res = await fetch(`${BASE_URL}/vendor-edit-profile/${userId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to update profile");
+  }
+
+  return res.json();
+};
+
+
+// ----------------------------------------------------------------------------------------------------
+
+
+
+
+
+

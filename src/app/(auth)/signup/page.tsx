@@ -41,7 +41,7 @@ const RegisterPage = () => {
             const formData = new FormData()
             formData.append("image", file)
 
-            const imgbbAPI = `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMAGBB_API_KEY}`
+            const imgbbAPI = `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_API_KEY}`
 
             const uploadResponse = await fetch(imgbbAPI, {
                 method: "POST",

@@ -1,4 +1,4 @@
-import { myMenuItem } from "@/lib/api/myMenut";
+import { getMenuBrows } from "@/lib/api/myMenut";
 import { TMenuItemData } from "@/components/types/type";
 import BrowseMenuClient from "../components/BrowseMenuClient";
 
@@ -20,7 +20,7 @@ const BrowseMenuPage = async ({
     let menuItems: TMenuItemData[] = [];
 
     try {
-        menuItems = await myMenuItem(query);
+        menuItems = await getMenuBrows(query);
     } catch (error) {
         console.error(error);
     }
