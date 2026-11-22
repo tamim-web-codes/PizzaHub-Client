@@ -74,6 +74,7 @@ const MenuDetails = ({ item }: { item: MenuDetailsData }) => {
     const handleOrderNow = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
+
         if (!session?.user) {
             toast.error("Please login before placing an order!");
             return;
@@ -89,6 +90,7 @@ const MenuDetails = ({ item }: { item: MenuDetailsData }) => {
         try {
             const data: OrderPostData = {
                 menuItemId: item._id,
+                imageUrl: item.ImageUrl,
                 itemName: item.itemName,
                 price: item.price,
                 quantity,

@@ -56,7 +56,7 @@ const menuItems = {
             title: "MENU",
             items: [
                 { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
-                { title: "My Orders", url: "/dashboard/orders", icon: ClipboardList },
+                { title: "My Orders", url: "/dashboard/customer/my-orders", icon: ClipboardList },
 
             ],
         },

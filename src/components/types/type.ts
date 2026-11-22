@@ -31,7 +31,7 @@ export type OrderPostData = {
   customerId: string;
   customerName: string;
   customerEmail: string;
-
+    imageUrl?: string;
   deliveryDate: string;
   deliveryAddress: string;
   phone: string;
@@ -40,8 +40,25 @@ export type OrderPostData = {
   status: "pending";
 };
 
-export type TOrderData = OrderPostData & {
+export type TOrderData = {
   _id: string;
-  status: "pending" | "accepted" | "rejected" ;
-  createdAt?: string;
+  menuItemId: string;
+  imageUrl?: string;
+  itemName: string;
+  price: number;
+  quantity: number;
+  vendorId: string;
+  customerId: string;
+  customerName: string;
+  customerEmail: string;
+  deliveryDate: string;
+  deliveryAddress: string;
+  phone: string;
+  totalPrice: number;
+  status:
+    | "pending"
+    | "accepted"
+    | "rejected"
+    | "cancelled"
+    | "delivered";
 };
