@@ -46,3 +46,24 @@ export const updateCustomerProfile = async (
 
   return result;
 };
+
+
+export const cancelCustomerOrder = async (orderId: string) => {
+    const res = await fetch(
+        `${BASE_URL}/order-canceld/${orderId}`,
+        {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
+
+    const result = await res.json();
+
+    if (!res.ok) {
+        throw new Error(result.message || "Failed to cancel order");
+    }
+
+    return result;
+};

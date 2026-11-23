@@ -2,6 +2,7 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
     CalendarDays,
@@ -11,9 +12,13 @@ import {
     Phone,
     ShoppingBag,
     XCircle,
+    Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { TOrderData } from "@/components/types/type";
+import { cancelCustomerOrder } from "@/lib/actions/orderPost";
+
 
 type Props = {
     orders: TOrderData[];
@@ -28,6 +33,42 @@ const statusStyles: Record<string, string> = {
 };
 
 const CustomerOrdersList = ({ orders }: Props) => {
+   
+    const [orderList, setOrderList] = useState(orders);
+    const [loadingId, setLoadingId] = useState<string | null>(null);
+
+    // Cancel Order Handler
+    const handleCancelOrder = async (orderId: string) => {
+        try {
+            setLoadingId(orderId);
+
+            const result = await cancelCustomerOrder(orderId);
+
+            // API সফল হলে সঙ্গে সঙ্গে UI update হবে
+            setOrderList((prevOrders) =>
+                prevOrders.map((order) =>
+                    order._id === orderId
+                        ? { ...order, status: "cancelled" }
+                        : order
+                )
+            );
+
+            toast.success(result?.message || "Order cancelled successfully!");
+
+         
+        } catch (error) {
+            console.error("Cancel order error:", error);
+
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to cancel order!"
+            );
+        } finally {
+            setLoadingId(null);
+        }
+    };
+
     return (
         <div className="mx-auto w-full max-w-6xl space-y-7">
 
@@ -70,13 +111,13 @@ const CustomerOrdersList = ({ orders }: Props) => {
                     </h2>
 
                     <span className="text-sm text-slate-500">
-                        {orders.length} orders
+                        {orderList.length} orders
                     </span>
                 </div>
 
-                {orders.length > 0 ? (
+                {orderList.length > 0 ? (
                     <div className="grid grid-cols-1 gap-5">
-                        {orders.map((order, index) => (
+                        {orderList.map((order, index) => (
                             <motion.div
                                 key={order._id}
                                 initial={{ opacity: 0, y: 20 }}
@@ -182,14 +223,25 @@ const CustomerOrdersList = ({ orders }: Props) => {
                                             </p>
                                         </div>
 
-                                        {/* Cancel Button UI */}
+                                        {/* Cancel Button */}
                                         {order.status === "pending" ? (
                                             <button
                                                 type="button"
-                                                className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-red-200 px-2.5 text-xs font-semibold text-red-600 transition hover:bg-red-50 sm:h-9 sm:px-3 sm:text-sm"
+                                                disabled={loadingId === order._id}
+                                                onClick={() => handleCancelOrder(order._id)}
+                                                className="flex h-8 shrink-0 items-center gap-1.5 rounded-lg border border-red-200 px-2.5 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 sm:h-9 sm:px-3 sm:text-sm"
                                             >
-                                                <XCircle className="h-3.5 w-3.5" />
-                                                Cancel Order
+                                                {loadingId === order._id ? (
+                                                    <>
+                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                        Cancelling...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <XCircle className="h-3.5 w-3.5" />
+                                                        Cancel Order
+                                                    </>
+                                                )}
                                             </button>
                                         ) : (
                                             <div className="flex items-center gap-1 text-xs font-medium capitalize text-slate-400">

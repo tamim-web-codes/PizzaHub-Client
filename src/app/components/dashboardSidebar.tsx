@@ -151,7 +151,7 @@ const DashboardSidebar = () => {
 
         <Sidebar
             collapsible="icon"
-            className="container mx-auto absolute border-r border-slate-200 bg-white px-0"
+            className="container mx-auto absolute sticky top-0 h-screen border-r border-slate-200 bg-white px-0"
         >
 
             {/* BRAND */}
