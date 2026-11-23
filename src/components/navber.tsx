@@ -4,7 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
     UserRound,
     Menu,
@@ -24,10 +24,12 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "./ui/popover";
+import { toast } from "sonner";
 
 const Navbar = () => {
     const { data: session } = authClient.useSession();
     const user = session?.user;
+    const router = useRouter()
 
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
@@ -48,6 +50,9 @@ const Navbar = () => {
 
     const handleLogout = async () => {
         await authClient.signOut();
+        toast.success("Logged out successfully!");
+        router.push("/signin");
+        router.refresh();
         setIsOpen(false);
     };
 

@@ -63,7 +63,7 @@ const menuItems = {
         {
             title: "PREFERENCES",
             items: [
-                { title: "My Profile Settings", url: "/dashboard/profile", icon: UserRound },
+                { title: "My Profile Settings", url: "/dashboard/customer/profile", icon: UserRound },
 
             ],
         },
@@ -155,7 +155,7 @@ const DashboardSidebar = () => {
         >
 
             {/* BRAND */}
-            <SidebarHeader className="p-3 group-data-[collapsible=icon]:p-2">
+            <SidebarHeader className="p-3 bg-white group-data-[collapsible=icon]:p-2">
                 <Link
                     href="/"
                     className="flex w-full items-center gap-3 group-data-[collapsible=icon]:justify-center"
@@ -177,7 +177,7 @@ const DashboardSidebar = () => {
             </SidebarHeader>
             <SidebarSeparator className="bg-slate-100" />
 
-            <SidebarContent className="px-2 group-data-[collapsible=icon]:px-2">
+            <SidebarContent className="px-2 bg-white group-data-[collapsible=icon]:px-2">
 
                 {/* USER PROFILE */}
                 <div className="mx-1 my-4 rounded-xl border border-slate-100 bg-slate-50 p-3 group-data-[collapsible=icon]:mx-0 group-data-[collapsible=icon]:border-0 group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0">
@@ -268,7 +268,7 @@ const DashboardSidebar = () => {
             <SidebarSeparator className="bg-slate-100" />
 
             {/* FOOTER */}
-            <SidebarFooter className="gap-2 p-3">
+            <SidebarFooter className="gap-2 bg-white p-3">
 
                 <SidebarMenu>
                     <SidebarMenuItem>

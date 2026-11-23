@@ -18,3 +18,31 @@ const res = await fetch(`${BASE_URL}/order-now`,{
   }
  return res.json()
 }
+
+
+export type UpdateProfileData = {
+  name: string;
+  image?: string;
+};
+
+
+export const updateCustomerProfile = async (
+  id: string,
+  data: UpdateProfileData
+) => {
+  const res = await fetch(`${BASE_URL}/update-customer-profile/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.message || "Profile update failed");
+  }
+
+  return result;
+};
