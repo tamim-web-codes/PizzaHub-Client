@@ -24,6 +24,8 @@ import { useRouter } from "next/navigation";
 import { addmenupost } from "@/lib/actions/postAddMenu";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
+import { getVendorPremium } from "@/lib/api/user";
+
 
 export type MenuItemData = {
   itemName: string;
@@ -138,16 +140,29 @@ const AddMenuItemPage = () => {
       };
 
       // Send Data to Backend
+      // First check vendor premium status
+      const premiumUser = await getVendorPremium(session.user.id);
+
+      console.log("Premium status:", premiumUser);
+
+      // Then add menu item
       const postmenu = await addmenupost(data);
 
-      if (!postmenu) {
-        throw new Error("Failed to add menu item.");
+      // Check free user limit
+      if (!premiumUser?.premium && postmenu.limitReached) {
+        toast.error("Your free menu limit is over. Please upgrade!");
+        router.push("/dashboard/vendor/subscription");
+        return;
+      }
+
+      // Check menu creation success
+      if (!postmenu.success) {
+        toast.error(postmenu.message || "Failed to add menu item!");
+        return;
       }
 
       toast.success("Menu item added successfully!");
-
       router.push("/dashboard/vendor/my-menu-items");
-      router.refresh();
 
     } catch (error) {
       console.error("Add menu item error:", error);

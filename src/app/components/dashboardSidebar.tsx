@@ -88,7 +88,7 @@ const menuItems = {
             title: "BUSINESS",
             items: [
 
-                { title: "Subscription", url: "/dashboard/subscription", icon: CreditCard },
+                { title: "Subscription", url: "/dashboard/vendor/subscription", icon: CreditCard },
             ],
         },
         {

@@ -46,6 +46,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
 const MenuDetails = ({ item }: { item: MenuDetailsData }) => {
+
     const router = useRouter()
     const { data: session } = authClient.useSession()
     const images = Array.from(
@@ -76,12 +77,19 @@ const MenuDetails = ({ item }: { item: MenuDetailsData }) => {
     const handleOrderNow = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-
+        // Check login
         if (!session?.user) {
             toast.error("Please login before placing an order!");
             return;
         }
 
+        // Only customer can place an order
+        if (session.user.role !== "customer") {
+            toast.error("Only customers can place orders!");
+            return;
+        }
+
+        // Check delivery information
         if (!deliveryDate || !deliveryAddress.trim() || !phone.trim()) {
             toast.error("Please fill in all delivery details!");
             return;
@@ -114,15 +122,18 @@ const MenuDetails = ({ item }: { item: MenuDetailsData }) => {
 
             if (res) {
                 toast.success(res.message || "Order placed successfully!");
+
                 setOpen(false);
                 setQuantity(1);
                 setDeliveryDate("");
                 setDeliveryAddress("");
                 setPhone("");
-                router.push('/dashboard/customer/my-orders')
+
+                router.push("/dashboard/customer/my-orders");
             } else {
                 toast.error(res?.message || "Failed to place order!");
             }
+
         } catch (error) {
             console.error("Order failed:", error);
             toast.error("Failed to place order!");
