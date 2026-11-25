@@ -1,43 +1,88 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
-
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 import {
     MapPin,
-    ToggleLeft,
-    ToggleRight,
+    Loader2,
 } from "lucide-react";
 
 import { TMenuItemData } from "@/components/types/type";
 import { MenuEditDialoag } from "./MenuEditDialoag";
 import { DeleteMenuItem } from "./MenuDeleteDialoag";
+import { updateMenuAvailability } from "@/lib/actions/orderPost";
+
+
 
 type Props = {
     item: TMenuItemData;
+    vendorId: string;
     onDelete?: (id: string) => void;
-    onAvailabilityChange?: (id: string, available: boolean) => void;
+    onAvailabilityChange?: (
+        id: string,
+        available: boolean
+    ) => void;
 };
 
 const MenuItemCard = ({
     item,
-
-    onAvailabilityChange,
+    vendorId,
 }: Props) => {
     const [isAvailable, setIsAvailable] = useState(
-        item.isAvailable ?? false
+        item.isActive ?? true
     );
 
-    const handleAvailability = () => {
-        if (item.status !== "approved") return;
+    const [isUpdating, setIsUpdating] = useState(false);
+
+    // Database থেকে item update হলে state sync হবে
+    useEffect(() => {
+        setIsAvailable(item.isActive ?? true);
+    }, [item.isActive]);
+
+    const handleAvailability = async () => {
+        if (isUpdating) return;
 
         const updatedValue = !isAvailable;
 
-        setIsAvailable(updatedValue);
-        onAvailabilityChange?.(item._id, updatedValue);
+        try {
+            setIsUpdating(true);
+
+            // Backend API call
+            const result = await updateMenuAvailability(
+                item._id,
+                vendorId,
+                updatedValue
+            );
+
+            if (result.success) {
+                setIsAvailable(updatedValue);
+
+                toast.success(
+                    updatedValue
+                        ? "Menu item activated successfully!"
+                        : "Menu item deactivated successfully!"
+                );
+            } else {
+                toast.error(
+                    result.message || "Failed to update availability"
+                );
+            }
+
+        } catch (error) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "Something went wrong";
+
+            toast.error(message);
+
+        } finally {
+            setIsUpdating(false);
+        }
     };
 
     return (
@@ -68,7 +113,9 @@ const MenuItemCard = ({
                         />
                     ) : (
                         <div className="flex h-full min-h-48 items-center justify-center text-slate-400">
-                            <span className="text-sm">No image available</span>
+                            <span className="text-sm">
+                                No image available
+                            </span>
                         </div>
                     )}
                 </div>
@@ -100,7 +147,11 @@ const MenuItemCard = ({
 
                         {/* Location */}
                         <div className="mt-4 flex items-center gap-2 text-sm text-slate-500">
-                            <MapPin size={17} className="shrink-0 text-red-500" />
+                            <MapPin
+                                size={17}
+                                className="shrink-0 text-red-500"
+                            />
+
                             <span className="truncate">
                                 {item.location}
                             </span>
@@ -112,39 +163,62 @@ const MenuItemCard = ({
 
                         <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
 
-                            {/* Availability */}
-                            <button
-                                type="button"
-                                onClick={handleAvailability}
-                                disabled={item.status !== "approved"}
-                                className={`inline-flex w-fit items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition ${item.status !== "approved"
-                                    ? "cursor-not-allowed bg-slate-100 text-slate-400"
-                                    : isAvailable
-                                        ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                    }`}
-                                title={
-                                    item.status !== "approved"
-                                        ? "Only approved items can be made available"
-                                        : "Change availability"
-                                }
-                            >
-                                {isAvailable ? (
-                                    <ToggleRight size={20} />
-                                ) : (
-                                    <ToggleLeft size={20} />
-                                )}
+                            {/* Availability Switch */}
+                            <div className="flex items-center gap-3">
 
-                                {isAvailable ? "Available" : "Unavailable"}
-                            </button>
+                                <button
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={isAvailable}
+                                    onClick={handleAvailability}
+                                    disabled={isUpdating}
+                                    className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors cursor-pointer duration-300 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-60 ${isAvailable
+                                        ? "bg-emerald-500"
+                                        : "bg-slate-300"
+                                        }`}
+                                >
+                                    <span
+                                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-300 ${isAvailable
+                                            ? "translate-x-6"
+                                            : "translate-x-1"
+                                            }`}
+                                    />
+                                </button>
+
+                                <div className="flex flex-col">
+                                    <span
+                                        className={`text-sm font-bold ${isAvailable
+                                            ? "text-emerald-600"
+                                            : "text-slate-500"
+                                            }`}
+                                    >
+                                        {isUpdating
+                                            ? "Updating..."
+                                            : isAvailable
+                                                ? "Available"
+                                                : "Unavailable"}
+                                    </span>
+
+                                    <span className="text-xs text-slate-400">
+                                        {isAvailable
+                                            ? "Your item is active"
+                                            : "Your item is inactive"}
+                                    </span>
+                                </div>
+
+                                {isUpdating && (
+                                    <Loader2
+                                        size={16}
+                                        className="animate-spin text-red-500"
+                                    />
+                                )}
+                            </div>
 
                             {/* Action Buttons */}
                             <div className="grid grid-cols-3 gap-2">
-
                                 <MenuEditDialoag item={item} />
 
                                 <DeleteMenuItem item={item} />
-
                             </div>
                         </div>
                     </div>

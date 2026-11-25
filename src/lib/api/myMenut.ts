@@ -57,17 +57,6 @@ export const getMenuBrows = async (
 
 // ------------------------------------------------------------------------------------------------
 
-export const getVendorOverview = async(vendorId:string)=>{
-
-const res = await fetch(`${BASE_URL}/vendor/overview/${vendorId}`,)
-
-  if (!res.ok) {
-    throw new Error("Failed to add menu item");
-  }
- return res.json()
-}
-
-
 export type MenuDetailsData = TMenuItemData & {
   images?: string[];
   vendor?: {

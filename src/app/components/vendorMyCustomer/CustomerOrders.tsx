@@ -8,10 +8,12 @@ import {
 } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
+
 import { getVendorCustomerOrders } from "@/lib/api/user";
+import { updateCustomerOrderStatus } from "@/lib/actions/orderPost";
 
 type OrderStatus = "pending" | "accepted" | "rejected" | "cancelled";
-
 type VendorUpdateStatus = "pending" | "accepted" | "rejected";
 
 interface Order {
@@ -73,22 +75,23 @@ const cardVariants = {
 const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
 
+    // Fetch vendor orders
     const fetchOrders = useCallback(async () => {
         try {
             setLoading(true);
-            setError("");
 
             const data = await getVendorCustomerOrders(vendorId);
 
             setOrders(Array.isArray(data) ? data : []);
         } catch (err) {
-            setError(
+            const message =
                 err instanceof Error
                     ? err.message
-                    : "Something went wrong"
-            );
+                    : "Something went wrong";
+
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -98,19 +101,59 @@ const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
         fetchOrders();
     }, [fetchOrders]);
 
-    // Vendor can update only pending, accepted and rejected statuses.
-    // Customer-cancelled orders cannot be changed.
-    const handleStatusChange = (
-        orderId: string,
+    // Update order status
+    const handleStatusChange = async (
+        order: Order,
         newStatus: VendorUpdateStatus
     ) => {
-        setOrders((prevOrders) =>
-            prevOrders.map((order) =>
-                order._id === orderId && order.status !== "cancelled"
-                    ? { ...order, status: newStatus }
-                    : order
-            )
-        );
+        if (order.status === "cancelled") {
+            toast.error("Customer cancelled this order.");
+            return;
+        }
+
+        if (order.status === newStatus) {
+            return;
+        }
+
+        try {
+            setUpdatingOrderId(order._id);
+
+            const result = await updateCustomerOrderStatus(
+                order._id,
+                vendorId,
+                newStatus
+            );
+
+            if (result.success) {
+                setOrders((prevOrders) =>
+                    prevOrders.map((item) =>
+                        item._id === order._id
+                            ? { ...item, status: result.status }
+                            : item
+                    )
+                );
+
+                toast.success(
+                    `Order status updated to ${newStatus}...`
+                );
+            } else {
+                toast.error(
+                    result.message || "Failed to update order status."
+                );
+            }
+        } catch (err) {
+            const message =
+                err instanceof Error
+                    ? err.message
+                    : "Failed to update order status";
+
+            toast.error(message);
+
+            // Fetch latest orders after failure
+            await fetchOrders();
+        } finally {
+            setUpdatingOrderId(null);
+        }
     };
 
     if (loading) {
@@ -181,17 +224,6 @@ const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
                     </motion.button>
                 </motion.div>
 
-                {/* Error */}
-                {error && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600"
-                    >
-                        {error}
-                    </motion.div>
-                )}
-
                 {/* Orders */}
                 {orders.length === 0 ? (
                     <motion.div
@@ -248,7 +280,7 @@ const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
                                     {/* Content */}
                                     <div className="min-w-0 flex-1">
 
-                                        {/* Title and Current Status */}
+                                        {/* Title and Status */}
                                         <div className="mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-gray-100 pb-5">
                                             <div className="min-w-0">
                                                 <p className="mb-1 text-xs font-medium text-gray-400">
@@ -383,10 +415,13 @@ const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
                                                     <select
                                                         id={`status-${order._id}`}
                                                         value={order.status}
-                                                        disabled={order.status === "cancelled"}
+                                                        disabled={
+                                                            order.status === "cancelled" ||
+                                                            updatingOrderId === order._id
+                                                        }
                                                         onChange={(e) =>
                                                             handleStatusChange(
-                                                                order._id,
+                                                                order,
                                                                 e.target.value as VendorUpdateStatus
                                                             )
                                                         }
@@ -412,6 +447,12 @@ const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
                                                         <path d="m6 9 6 6 6-6" />
                                                     </svg>
                                                 </div>
+
+                                                {updatingOrderId === order._id && (
+                                                    <p className="mt-2 text-xs text-orange-600">
+                                                        Updating status...
+                                                    </p>
+                                                )}
 
                                                 {order.status === "cancelled" && (
                                                     <p className="mt-2 text-xs font-medium text-slate-500">

@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getVendorOverview } from "@/lib/api/myMenut";
-import VendorOverview from "@/app/components/VendorOverview";
+import VendorOverview from "@/app/components/vendorMyCustomer/VendorOverview";
 
 
 

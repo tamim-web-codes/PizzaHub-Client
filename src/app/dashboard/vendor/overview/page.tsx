@@ -1,55 +1,36 @@
-import { Suspense } from "react";
+import VendorOverview from "@/app/components/vendorMyCustomer/VendorOverview";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { getVendorOverview } from "@/lib/api/myMenut";
-import VendorOverview from "@/app/components/VendorOverview";
 
-
-
-const OverviewContent = async () => {
+const VendorDashboardPage = async () => {
     const session = await auth.api.getSession({
         headers: await headers(),
     });
 
-    if (!session) {
-        redirect("/signin");
+    if (!session?.user) {
+        redirect("/login");
     }
 
-    if (session.user.role !== "vendor") {
-        redirect("/unauthorized");
-    }
-    const vendorId = session?.user?.id
-    // const overview = await getVendorOverview(vendorId);
+    const vendorId = session.user.id;
 
-    // return <VendorOverview data={overview} />;
-};
-
-const VendorDashboardPage = () => {
     return (
-        <Suspense fallback={<OverviewSkeleton />}>
-            {/* <OverviewContent /> */}
-        </Suspense>
-    );
-};
+        <div className="min-h-screen w-full bg-white p-4 sm:p-6 lg:p-8">
+            <div className="mx-auto max-w-7xl space-y-6">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                        Dashboard Overview
+                    </h1>
 
-function OverviewSkeleton() {
-    return (
-        <div className="space-y-6 animate-pulse">
-            <div className="h-8 w-56 rounded-lg bg-gray-200" />
+                    <p className="mt-1 text-sm text-gray-500">
+                        Welcome back! Here is your restaurant overview.
+                    </p>
+                </div>
 
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                {[1, 2, 3, 4].map((item) => (
-                    <div
-                        key={item}
-                        className="h-32 rounded-xl bg-gray-200"
-                    />
-                ))}
+                <VendorOverview vendorId={vendorId} />
             </div>
-
-            <div className="h-24 rounded-xl bg-gray-200" />
         </div>
     );
-}
+};
 
 export default VendorDashboardPage;

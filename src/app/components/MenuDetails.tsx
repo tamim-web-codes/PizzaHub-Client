@@ -130,6 +130,7 @@ const MenuDetails = ({ item }: { item: MenuDetailsData }) => {
                 setPhone("");
 
                 router.push("/dashboard/customer/my-orders");
+                router.refresh()
             } else {
                 toast.error(res?.message || "Failed to place order!");
             }

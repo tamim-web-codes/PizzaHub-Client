@@ -102,7 +102,7 @@ const menuItems = {
         {
             title: "MANAGEMENT",
             items: [
-                { title: "Manage Users", url: "/dashboard/users", icon: Users },
+                { title: "Manage Users", url: "/dashboard/admin/users", icon: Users },
                 { title: "Manage Menu Items", url: "/dashboard/restaurants", icon: Store },
             ],
         },

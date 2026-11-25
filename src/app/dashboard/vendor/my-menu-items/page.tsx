@@ -8,9 +8,15 @@ import Link from "next/link";
 import MenuItemCard from "@/app/components/menuItemCard";
 import { myMenuItem } from "@/lib/api/myMenut";
 import { TMenuItemData } from "@/components/types/type";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 
 const MyMenuItem = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers()
+  })
+  const vendorId = session?.user.id
   let menuItems: TMenuItemData[] = [];
 
   try {
@@ -63,6 +69,8 @@ const MyMenuItem = async () => {
               <MenuItemCard
                 key={item._id}
                 item={item}
+                vendorId={vendorId}
+
               />
             ))}
           </div>
