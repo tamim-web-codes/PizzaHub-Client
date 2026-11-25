@@ -15,9 +15,49 @@ import React, { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const SignInPage = () => {
     const [showPassword, setShowPassword] = useState(false);
+
+
+    const router = useRouter();
+
+    const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+
+        const email = formData.get("email") as string;
+        const password = formData.get("password") as string;
+
+        const toastId = toast.loading("Signing in...");
+
+        try {
+            const { data, error } = await authClient.signIn.email({
+                email,
+                password,
+            });
+
+            if (error) {
+                toast.error(error.message || "Invalid email or password", {
+                    id: toastId,
+                });
+                return;
+            }
+
+            toast.success("Login successful!", { id: toastId });
+
+            router.push("/");
+            router.refresh();
+
+        } catch (error) {
+            toast.error("Something went wrong. Please try again.", {
+                id: toastId,
+            });
+        }
+    };
 
     const handlegooglesignin = async () => {
         const { data, error } = await authClient.signIn.social({
@@ -81,7 +121,7 @@ const SignInPage = () => {
                     </div>
 
                     {/* Sign In Form */}
-                    <form className="space-y-4">
+                    <form onSubmit={handleSignIn} className="space-y-4">
 
                         {/* Email */}
                         <div>

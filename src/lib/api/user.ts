@@ -11,3 +11,12 @@ export const getVendorPremium = async (vendorId: string) => {
 
     return res.json();
 };
+
+
+export const getVendorCustomerOrders = async (vendorId:string) => {
+    const res = await fetch(
+        `${BASE_URL}/vendor-to-customer-order/${vendorId}`
+    );
+
+    return res.json();
+};

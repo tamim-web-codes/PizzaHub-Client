@@ -8,28 +8,53 @@ import { headers } from "next/headers";
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 
-export const myMenuItem = async(query= ''): Promise<TMenuItemData[]>=>{
+export const myMenuItem = async (
+    query = ""
+): Promise<TMenuItemData[]> => {
     const session = await auth.api.getSession({
-    headers:await headers()
-})
+        headers: await headers()
+    });
 
-const res = await fetch(`${BASE_URL}/my-menu?${query}vendorId=${session?.user.id}`,)
+    if (!session?.user?.id) {
+        throw new Error("User not authenticated");
+    }
 
-  if (!res.ok) {
-    throw new Error("Failed to add menu item");
-  }
- return res.json()
-}
+    const params = new URLSearchParams(query);
+    params.set("vendorId", session.user.id);
+
+    const res = await fetch(
+        `${BASE_URL}/my-menu?${params.toString()}`,
+        {
+            cache: "no-store"
+        }
+    );
+
+    if (!res.ok) {
+        throw new Error("Failed to fetch menu items");
+    }
+
+    return res.json();
+};
 // ----------------------------------------------------------------------------------------------
-export const getMenuBrows = async(query= ''): Promise<TMenuItemData[]>=>{
 
-const res = await fetch(`${BASE_URL}/my-menu?${query}`,)
+export const getMenuBrows = async (
+    query = ""
+): Promise<TMenuItemData[]> => {
 
-  if (!res.ok) {
-    throw new Error("Failed to add menu item");
-  }
- return res.json()
-}
+    const res = await fetch(
+        `${BASE_URL}/my-menu?${query}`,
+        {
+            cache: "no-store",
+        }
+    );
+
+    if (!res.ok) {
+        throw new Error("Failed to fetch menu items");
+    }
+
+    return res.json();
+};
+
 // ------------------------------------------------------------------------------------------------
 
 export const getVendorOverview = async(vendorId:string)=>{

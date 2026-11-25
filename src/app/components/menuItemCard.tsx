@@ -1,17 +1,13 @@
+
 "use client";
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+
+import { motion } from "framer-motion";
 
 import {
     MapPin,
-    Pencil,
-    Trash2,
-    Eye,
-    Clock,
-    CheckCircle2,
-    XCircle,
     ToggleLeft,
     ToggleRight,
 } from "lucide-react";
@@ -26,16 +22,14 @@ type Props = {
     onAvailabilityChange?: (id: string, available: boolean) => void;
 };
 
-
 const MenuItemCard = ({
     item,
-    onDelete,
+
     onAvailabilityChange,
 }: Props) => {
     const [isAvailable, setIsAvailable] = useState(
         item.isAvailable ?? false
     );
-
 
     const handleAvailability = () => {
         if (item.status !== "approved") return;
@@ -47,8 +41,19 @@ const MenuItemCard = ({
     };
 
     return (
-        <div className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:border-red-200 hover:shadow-md">
-
+        <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+                duration: 0.5,
+                ease: "easeOut",
+            }}
+            whileHover={{
+                y: -5,
+                transition: { duration: 0.25 },
+            }}
+            className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:border-red-200 hover:shadow-xl"
+        >
             <div className="flex flex-col sm:flex-row">
 
                 {/* Image */}
@@ -66,8 +71,6 @@ const MenuItemCard = ({
                             <span className="text-sm">No image available</span>
                         </div>
                     )}
-
-
                 </div>
 
                 {/* Content */}
@@ -147,7 +150,7 @@ const MenuItemCard = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

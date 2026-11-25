@@ -10,6 +10,8 @@ export type TMenuItemData = {
   location: string;
   ImageUrl?: string;
   images?: string[];
+  isPremium?: boolean;
+  
 
   vendor?: {
     _id?: string;

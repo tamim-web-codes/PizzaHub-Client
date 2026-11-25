@@ -37,7 +37,7 @@ const Navbar = () => {
     const navLinks = [
         { name: "Home", href: "/" },
         { name: "Browse Menu", href: "/brows-menu" },
-        { name: "Dashboard", href: `/dashboard/${user?.role}` },
+        { name: "Dashboard", href: `/dashboard/${user?.role}/overview`, },
     ];
 
     const isActive = (href: string) => {
