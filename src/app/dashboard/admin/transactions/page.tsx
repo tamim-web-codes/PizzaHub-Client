@@ -1,3 +1,6 @@
+import AdminTransactionsClient from "@/app/components/admin-folder/AdminTransactionsClient";
+
+
 export default function AdminTransactionsPage() {
-  return <h1>Transactions</h1>;
+  return <AdminTransactionsClient />;
 }

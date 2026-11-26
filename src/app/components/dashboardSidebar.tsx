@@ -103,13 +103,13 @@ const menuItems = {
             title: "MANAGEMENT",
             items: [
                 { title: "Manage Users", url: "/dashboard/admin/users", icon: Users },
-                { title: "Manage Menu Items", url: "/dashboard/restaurants", icon: Store },
+                { title: "Manage Menu Items", url: "/dashboard/admin/menu-items", icon: Store },
             ],
         },
         {
             title: "REPORTS & SETTINGS",
             items: [
-                { title: "Transactions", url: "/dashboard/transactions", icon: CreditCard },
+                { title: "Transactions", url: "/dashboard/admin/transactions", icon: CreditCard },
             ],
         },
     ],

@@ -18,6 +18,7 @@ export default async function Success({
     const {
         status,
         payment_status,
+        amount_total,
         customer_email,
         metadata,
         payment_intent,
@@ -35,6 +36,7 @@ export default async function Success({
         console.log({
             status,
             payment_intent,
+            amount_total,
             metadata,
             customer_email,
             payment_status,
