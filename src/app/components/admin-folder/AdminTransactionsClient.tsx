@@ -197,40 +197,6 @@ export default function AdminTransactionsClient() {
                     </button>
                 </div>
 
-                {/* Statistics */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    <StatCard
-                        title="Total Transactions"
-                        value={totalTransactions}
-                        icon={<ReceiptText size={21} />}
-                        iconBg="bg-blue-50"
-                        iconColor="text-blue-600"
-                    />
-
-                    <StatCard
-                        title="Successful Payments"
-                        value={paidTransactions}
-                        icon={<CheckCircle2 size={21} />}
-                        iconBg="bg-green-50"
-                        iconColor="text-green-600"
-                    />
-
-                    <StatCard
-                        title="Pending Payments"
-                        value={pendingTransactions}
-                        icon={<Clock3 size={21} />}
-                        iconBg="bg-yellow-50"
-                        iconColor="text-yellow-600"
-                    />
-
-                    <StatCard
-                        title="Failed Payments"
-                        value={failedTransactions}
-                        icon={<XCircle size={21} />}
-                        iconBg="bg-red-50"
-                        iconColor="text-red-600"
-                    />
-                </div>
 
                 {/* Revenue */}
                 <div className="rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 to-white p-5 sm:p-6">

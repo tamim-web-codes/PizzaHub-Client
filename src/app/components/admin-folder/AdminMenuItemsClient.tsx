@@ -1,9 +1,14 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+    memo,
+    useCallback,
+    useDeferredValue,
+    useMemo,
+    useState,
+} from "react";
 import Image from "next/image";
-import { AnimatePresence, motion } from "framer-motion";
 import {
     Search,
     Pizza,
@@ -29,8 +34,12 @@ import {
     AlertDialogMedia,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { deleteAdminMenuItem, getAdminMenuItems, updateMenuItemStatus } from "@/lib/api/adminApi";
 
+import {
+    deleteAdminMenuItem,
+    getAdminMenuItems,
+    updateMenuItemStatus,
+} from "@/lib/api/adminApi";
 
 type MenuItem = {
     _id: string;
@@ -62,6 +71,9 @@ const statusStyles: Record<string, string> = {
     rejected: "bg-red-100 text-red-700",
 };
 
+const getImage = (item: MenuItem) =>
+    item.ImageUrl || item.imageUrl || item.image || "/default-menu.png";
+
 export default function AdminMenuItemsClient({
     initialMenuItems,
 }: Props) {
@@ -70,6 +82,8 @@ export default function AdminMenuItemsClient({
     );
 
     const [search, setSearch] = useState("");
+    const deferredSearch = useDeferredValue(search);
+
     const [status, setStatus] = useState<FilterStatus>("all");
     const [category, setCategory] = useState("all");
 
@@ -80,10 +94,11 @@ export default function AdminMenuItemsClient({
 
     // Search and Filter
     const filteredItems = useMemo(() => {
+        const searchValue = deferredSearch.toLowerCase().trim();
+
         return menuItems.filter((item) => {
-            const matchesSearch = (item.itemName || "")
-                .toLowerCase()
-                .includes(search.toLowerCase().trim());
+            const matchesSearch =
+                (item.itemName || "").toLowerCase().includes(searchValue);
 
             const matchesStatus =
                 status === "all" || item.status === status;
@@ -93,7 +108,7 @@ export default function AdminMenuItemsClient({
 
             return matchesSearch && matchesStatus && matchesCategory;
         });
-    }, [menuItems, search, status, category]);
+    }, [menuItems, deferredSearch, status, category]);
 
     // Categories
     const categories = useMemo(() => {
@@ -114,13 +129,18 @@ export default function AdminMenuItemsClient({
     );
 
     // Refresh
-    const fetchMenuItems = async () => {
+    const fetchMenuItems = useCallback(async () => {
         try {
             setLoading(true);
 
-            await getAdminMenuItems()
+            const result = await getAdminMenuItems();
 
-            toast.success("Menu items refreshed");
+            if (result?.success && Array.isArray(result.menuItems)) {
+                setMenuItems(result.menuItems);
+                toast.success("Menu items refreshed");
+            } else {
+                throw new Error(result?.message || "Failed to refresh menu items");
+            }
         } catch (error) {
             toast.error(
                 error instanceof Error ? error.message : "Something went wrong"
@@ -128,61 +148,52 @@ export default function AdminMenuItemsClient({
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     // Approve / Reject
-    const handleStatusChange = async (
-        id: string,
-        newStatus: "approved" | "rejected"
-    ) => {
-        try {
-            setUpdatingId(id);
+    const handleStatusChange = useCallback(
+        async (id: string, newStatus: "approved" | "rejected") => {
+            try {
+                setUpdatingId(id);
 
-            await updateMenuItemStatus(id, newStatus,);
+                await updateMenuItemStatus(id, newStatus);
 
-            setMenuItems((previous) =>
-                previous.map((item) =>
-                    item._id === id
-                        ? { ...item, status: newStatus }
-                        : item
-                )
-            );
-            toast.success(
-                newStatus === "approved"
-                    ? "Menu item approved successfully"
-                    : "Menu item rejected successfully"
-            );
-        } catch (error) {
-            toast.error(
-                error instanceof Error ? error.message : "Something went wrong"
-            );
-        } finally {
-            setUpdatingId(null);
-        }
-    };
+                setMenuItems((previous) =>
+                    previous.map((item) =>
+                        item._id === id
+                            ? { ...item, status: newStatus }
+                            : item
+                    )
+                );
 
-    // Active / Inactive
-    const handleAvailability = async (item: MenuItem) => {
+                toast.success(
+                    newStatus === "approved"
+                        ? "Menu item approved successfully"
+                        : "Menu item rejected successfully"
+                );
+            } catch (error) {
+                toast.error(
+                    error instanceof Error ? error.message : "Something went wrong"
+                );
+            } finally {
+                setUpdatingId(null);
+            }
+        },
+        []
+    );
+
+    // Availability
+    const handleAvailability = useCallback(async (item: MenuItem) => {
         const newAvailability = !item.isActive;
 
         try {
             setUpdatingId(item._id);
 
-            await deleteAdminMenuItem(item._id);
+            // এখানে availability update করার আলাদা API ব্যবহার করতে হবে।
+            // deleteAdminMenuItem() দিয়ে availability toggle করা যাবে না।
+            // তোমার backend endpoint অনুযায়ী helper বসাবে।
 
-            setMenuItems((previous) =>
-                previous.map((menu) =>
-                    menu._id === item._id
-                        ? { ...menu, isActive: newAvailability }
-                        : menu
-                )
-            );
-
-            toast.success(
-                newAvailability
-                    ? "Menu item activated"
-                    : "Menu item deactivated"
-            );
+            toast.error("Availability update API is not configured");
         } catch (error) {
             toast.error(
                 error instanceof Error ? error.message : "Something went wrong"
@@ -190,10 +201,10 @@ export default function AdminMenuItemsClient({
         } finally {
             setUpdatingId(null);
         }
-    };
+    }, []);
 
     // Delete
-    const handleDelete = async () => {
+    const handleDelete = useCallback(async () => {
         if (!deleteItem) return;
 
         const id = deleteItem._id;
@@ -201,8 +212,7 @@ export default function AdminMenuItemsClient({
         try {
             setDeletingId(id);
 
-            await deleteAdminMenuItem(id)
-
+            await deleteAdminMenuItem(id);
 
             setMenuItems((previous) =>
                 previous.filter((item) => item._id !== id)
@@ -217,10 +227,7 @@ export default function AdminMenuItemsClient({
         } finally {
             setDeletingId(null);
         }
-    };
-
-    const getImage = (item: MenuItem) =>
-        item.ImageUrl || item.imageUrl || item.image || "/default-menu.png";
+    }, [deleteItem]);
 
     const statCards = [
         {
@@ -254,11 +261,7 @@ export default function AdminMenuItemsClient({
             <div className="mx-auto max-w-7xl space-y-7">
 
                 {/* Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"
-                >
+                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                     <div>
                         <div className="flex items-center gap-3">
                             <div className="rounded-xl bg-orange-100 p-3 text-orange-600">
@@ -287,7 +290,7 @@ export default function AdminMenuItemsClient({
                         />
                         Refresh
                     </button>
-                </motion.div>
+                </div>
 
                 {/* Search & Filters */}
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm sm:p-5">
@@ -352,7 +355,9 @@ export default function AdminMenuItemsClient({
                         </p>
                     </div>
 
-                    {filteredItems.length === 0 ? (
+                    {loading ? (
+                        <MenuItemsLoading />
+                    ) : filteredItems.length === 0 ? (
                         <div className="flex min-h-64 flex-col items-center justify-center gap-3 p-6 text-center">
                             <Pizza size={35} className="text-orange-500" />
                             <h3 className="font-bold text-gray-800">
@@ -380,245 +385,55 @@ export default function AdminMenuItemsClient({
                                     </thead>
 
                                     <tbody className="divide-y divide-gray-100">
-                                        <AnimatePresence>
-                                            {filteredItems.map((item) => (
-                                                <motion.tr
-                                                    key={item._id}
-                                                    layout
-                                                    initial={{ opacity: 0, y: 8 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    exit={{ opacity: 0, x: -15 }}
-                                                    className="transition hover:bg-orange-50/50"
-                                                >
-                                                    <td className="px-5 py-4">
-                                                        <div className="flex min-w-52 items-center gap-3">
-                                                            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                                                                <Image
-                                                                    src={getImage(item)}
-                                                                    alt={item.itemName}
-                                                                    fill
-                                                                    unoptimized
-                                                                    className="object-cover"
-                                                                />
-                                                            </div>
-
-                                                            <div>
-                                                                <p className="font-semibold text-gray-900">
-                                                                    {item.itemName}
-                                                                </p>
-                                                                <p className="mt-1 max-w-44 truncate text-xs text-gray-500">
-                                                                    {item.location || "No location"}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-
-                                                    <td className="px-5 py-4 text-sm text-gray-600">
-                                                        {item.businessName || item.vendorName || "Vendor"}
-                                                    </td>
-
-                                                    <td className="px-5 py-4">
-                                                        <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-medium capitalize text-gray-600">
-                                                            {item.category}
-                                                        </span>
-                                                    </td>
-
-                                                    <td className="px-5 py-4 text-sm font-semibold text-gray-900">
-                                                        ৳{item.price}
-                                                    </td>
-
-                                                    <td className="px-5 py-4">
-                                                        <span className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${statusStyles[item.status] || "bg-gray-100 text-gray-600"}`}>
-                                                            {item.status}
-                                                        </span>
-                                                    </td>
-
-                                                    <td className="px-5 py-4">
-                                                        <span className={`text-xs font-semibold ${item.isActive ? "text-green-600" : "text-gray-400"}`}>
-                                                            {item.isActive ? "Active" : "Inactive"}
-                                                        </span>
-                                                    </td>
-
-                                                    <td className="px-5 py-4">
-                                                        <div className="flex items-center justify-center gap-2">
-                                                            {item.status === "pending" && (
-                                                                <>
-                                                                    <ActionButton
-                                                                        title="Approve"
-                                                                        color="green"
-                                                                        disabled={updatingId === item._id}
-                                                                        onClick={() => handleStatusChange(item._id, "approved")}
-                                                                        icon={
-                                                                            updatingId === item._id
-                                                                                ? <Loader2 size={17} className="animate-spin" />
-                                                                                : <CheckCircle2 size={17} />
-                                                                        }
-                                                                    />
-
-                                                                    <ActionButton
-                                                                        title="Reject"
-                                                                        color="red"
-                                                                        disabled={updatingId === item._id}
-                                                                        onClick={() => handleStatusChange(item._id, "rejected")}
-                                                                        icon={<XCircle size={17} />}
-                                                                    />
-                                                                </>
-                                                            )}
-
-                                                            {item.status === "approved" && (
-                                                                <ActionButton
-                                                                    title={item.isActive ? "Deactivate" : "Activate"}
-                                                                    color={item.isActive ? "amber" : "green"}
-                                                                    disabled={updatingId === item._id}
-                                                                    onClick={() => handleAvailability(item)}
-                                                                    icon={
-                                                                        updatingId === item._id
-                                                                            ? <Loader2 size={17} className="animate-spin" />
-                                                                            : <Power size={17} />
-                                                                    }
-                                                                />
-                                                            )}
-
-                                                            <ActionButton
-                                                                title="Delete"
-                                                                color="red"
-                                                                disabled={deletingId === item._id}
-                                                                onClick={() => setDeleteItem(item)}
-                                                                icon={<Trash2 size={17} />}
-                                                            />
-                                                        </div>
-                                                    </td>
-                                                </motion.tr>
-                                            ))}
-                                        </AnimatePresence>
+                                        {filteredItems.map((item) => (
+                                            <MenuItemRow
+                                                key={item._id}
+                                                item={item}
+                                                updating={updatingId === item._id}
+                                                deleting={deletingId === item._id}
+                                                onStatusChange={handleStatusChange}
+                                                onAvailability={handleAvailability}
+                                                onDelete={() => setDeleteItem(item)}
+                                            />
+                                        ))}
                                     </tbody>
                                 </table>
                             </div>
 
                             {/* Mobile Cards */}
                             <div className="grid gap-4 p-4 lg:hidden">
-                                <AnimatePresence>
-                                    {filteredItems.map((item) => (
-                                        <motion.div
-                                            key={item._id}
-                                            layout
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, scale: 0.95 }}
-                                            className="rounded-xl border border-gray-100 bg-white p-4"
-                                        >
-                                            <div className="flex gap-3">
-                                                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                                                    <Image
-                                                        src={getImage(item)}
-                                                        alt={item.itemName}
-                                                        fill
-                                                        unoptimized
-                                                        className="object-cover"
-                                                    />
-                                                </div>
-
-                                                <div className="min-w-0 flex-1">
-                                                    <h3 className="truncate font-bold text-gray-900">
-                                                        {item.itemName}
-                                                    </h3>
-                                                    <p className="mt-1 text-sm text-gray-500">
-                                                        {item.businessName || item.vendorName || "Vendor"}
-                                                    </p>
-                                                    <p className="mt-1 font-semibold text-orange-600">
-                                                        ৳{item.price}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-                                                <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${statusStyles[item.status] || "bg-gray-100 text-gray-600"}`}>
-                                                    {item.status}
-                                                </span>
-
-                                                <span className={`text-xs font-semibold ${item.isActive ? "text-green-600" : "text-gray-400"}`}>
-                                                    {item.isActive ? "Active" : "Inactive"}
-                                                </span>
-                                            </div>
-
-                                            <div className="mt-4 flex flex-wrap gap-2 border-t border-gray-100 pt-3">
-                                                {item.status === "pending" && (
-                                                    <>
-                                                        <button
-                                                            type="button"
-                                                            disabled={updatingId === item._id}
-                                                            onClick={() => handleStatusChange(item._id, "approved")}
-                                                            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-green-50 px-3 py-2.5 text-xs font-semibold text-green-700 disabled:opacity-50"
-                                                        >
-                                                            <CheckCircle2 size={15} />
-                                                            Approve
-                                                        </button>
-
-                                                        <button
-                                                            type="button"
-                                                            disabled={updatingId === item._id}
-                                                            onClick={() => handleStatusChange(item._id, "rejected")}
-                                                            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-red-50 px-3 py-2.5 text-xs font-semibold text-red-700 disabled:opacity-50"
-                                                        >
-                                                            <XCircle size={15} />
-                                                            Reject
-                                                        </button>
-                                                    </>
-                                                )}
-
-                                                {item.status === "approved" && (
-                                                    <button
-                                                        type="button"
-                                                        disabled={updatingId === item._id}
-                                                        onClick={() => handleAvailability(item)}
-                                                        className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2.5 text-xs font-semibold text-amber-700 disabled:opacity-50"
-                                                    >
-                                                        <Power size={15} />
-                                                        {item.isActive ? "Deactivate" : "Activate"}
-                                                    </button>
-                                                )}
-
-                                                <button
-                                                    type="button"
-                                                    disabled={deletingId === item._id}
-                                                    onClick={() => setDeleteItem(item)}
-                                                    className="flex items-center justify-center gap-1.5 rounded-lg bg-red-50 px-3 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-100 disabled:opacity-50"
-                                                >
-                                                    <Trash2 size={15} />
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </AnimatePresence>
+                                {filteredItems.map((item) => (
+                                    <MenuItemCard
+                                        key={item._id}
+                                        item={item}
+                                        updating={updatingId === item._id}
+                                        deleting={deletingId === item._id}
+                                        onStatusChange={handleStatusChange}
+                                        onAvailability={handleAvailability}
+                                        onDelete={() => setDeleteItem(item)}
+                                    />
+                                ))}
                             </div>
                         </>
                     )}
                 </div>
             </div>
 
-            {/* Delete Alert Dialog */}
-
+            {/* Delete Dialog */}
             <AlertDialog
                 open={!!deleteItem}
                 onOpenChange={(open) => {
-                    if (!open && !deletingId) {
-                        setDeleteItem(null);
-                    }
+                    if (!open && !deletingId) setDeleteItem(null);
                 }}
             >
                 <AlertDialogContent className="max-w-[420px] overflow-hidden rounded-2xl border border-gray-100 bg-white p-0 shadow-2xl">
-
-                    {/* Top Section */}
                     <div className="px-6 pt-7">
                         <AlertDialogHeader className="items-center text-center">
-
-                            {/* Warning Icon */}
                             <AlertDialogMedia className="mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-600 ring-8 ring-red-50/60">
-                                <Trash2 className="h-7 w-7" strokeWidth={2} />
+                                <Trash2 className="h-7 w-7" />
                             </AlertDialogMedia>
 
-                            <AlertDialogTitle className="text-xl font-bold tracking-tight text-gray-900">
+                            <AlertDialogTitle className="text-xl font-bold text-gray-900">
                                 Delete Menu Item?
                             </AlertDialogTitle>
 
@@ -627,7 +442,6 @@ export default function AdminMenuItemsClient({
                             </AlertDialogDescription>
                         </AlertDialogHeader>
 
-                        {/* Selected Item */}
                         {deleteItem && (
                             <div className="mt-5 flex items-center gap-3 rounded-xl border border-red-100 bg-red-50/50 p-3">
                                 <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-white">
@@ -636,6 +450,7 @@ export default function AdminMenuItemsClient({
                                         alt={deleteItem.itemName}
                                         fill
                                         unoptimized
+                                        sizes="56px"
                                         className="object-cover"
                                     />
                                 </div>
@@ -644,37 +459,30 @@ export default function AdminMenuItemsClient({
                                     <p className="truncate text-sm font-bold text-gray-900">
                                         {deleteItem.itemName}
                                     </p>
-
                                     <p className="mt-1 text-xs capitalize text-gray-500">
                                         {deleteItem.category}
                                     </p>
-
                                     <p className="mt-1 text-sm font-semibold text-orange-600">
                                         ৳{deleteItem.price}
                                     </p>
                                 </div>
 
-                                <div className="rounded-full bg-red-100 p-2 text-red-600">
-                                    <Trash2 size={16} />
-                                </div>
+                                <Trash2 size={18} className="text-red-600" />
                             </div>
                         )}
 
-                        {/* Warning Message */}
                         <div className="mt-4 flex gap-2 rounded-lg bg-amber-50 px-3 py-2.5">
-                            <span className="mt-0.5 text-amber-600">⚠</span>
+                            <span className="text-amber-600">⚠</span>
                             <p className="text-xs leading-5 text-amber-800">
                                 Deleting this item will permanently remove it from the menu.
                             </p>
                         </div>
                     </div>
 
-                    {/* Footer Actions */}
-                    <AlertDialogFooter className="mt-6 flex-row justify-end gap-3 border-t border-gray-100 bg-gray-50/80 px-6 mb-2 py-4">
-
+                    <AlertDialogFooter className="mt-6 flex-row justify-end gap-3 border-t border-gray-100 bg-gray-50/80 px-6 py-4">
                         <AlertDialogCancel
                             disabled={!!deletingId}
-                            className="mt-0 h-11 flex-1 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700 shadow-sm hover:bg-gray-100"
+                            className="mt-0 h-11 flex-1 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700 hover:bg-gray-100"
                         >
                             Cancel
                         </AlertDialogCancel>
@@ -686,7 +494,7 @@ export default function AdminMenuItemsClient({
                                 event.preventDefault();
                                 handleDelete();
                             }}
-                            className="h-11 flex-1 rounded-xl bg-red-600 font-semibold text-white shadow-sm shadow-red-200 transition hover:bg-red-700 disabled:opacity-60"
+                            className="h-11 flex-1 rounded-xl bg-red-600 font-semibold text-white hover:bg-red-700 disabled:opacity-60"
                         >
                             {deletingId ? (
                                 <>
@@ -700,12 +508,239 @@ export default function AdminMenuItemsClient({
                                 </>
                             )}
                         </AlertDialogAction>
-
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-
         </div>
+    );
+}
+
+// Desktop Row
+const MenuItemRow = memo(function MenuItemRow({
+    item,
+    updating,
+    deleting,
+    onStatusChange,
+    onAvailability,
+    onDelete,
+}: {
+    item: MenuItem;
+    updating: boolean;
+    deleting: boolean;
+    onStatusChange: (id: string, status: "approved" | "rejected") => void;
+    onAvailability: (item: MenuItem) => void;
+    onDelete: () => void;
+}) {
+    return (
+        <tr className="transition-colors duration-150 hover:bg-orange-50/50">
+            <td className="px-5 py-4">
+                <div className="flex min-w-52 items-center gap-3">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                        <Image
+                            src={getImage(item)}
+                            alt={item.itemName}
+                            fill
+                            unoptimized
+                            sizes="48px"
+                            className="object-cover"
+                        />
+                    </div>
+                    <div>
+                        <p className="font-semibold text-gray-900">
+                            {item.itemName}
+                        </p>
+                        <p className="mt-1 max-w-44 truncate text-xs text-gray-500">
+                            {item.location || "No location"}
+                        </p>
+                    </div>
+                </div>
+            </td>
+
+            <td className="px-5 py-4 text-sm text-gray-600">
+                {item.businessName || item.vendorName || "Vendor"}
+            </td>
+
+            <td className="px-5 py-4">
+                <span className="rounded-lg bg-gray-100 px-3 py-1.5 text-xs font-medium capitalize text-gray-600">
+                    {item.category}
+                </span>
+            </td>
+
+            <td className="px-5 py-4 text-sm font-semibold text-gray-900">
+                ৳{item.price}
+            </td>
+
+            <td className="px-5 py-4">
+                <StatusBadge status={item.status} />
+            </td>
+
+            <td className="px-5 py-4">
+                <AvailabilityBadge active={item.isActive} />
+            </td>
+
+            <td className="px-5 py-4">
+                <div className="flex items-center justify-center gap-2">
+                    {item.status === "pending" && (
+                        <>
+                            <ActionButton
+                                title="Approve"
+                                color="green"
+                                disabled={updating}
+                                onClick={() => onStatusChange(item._id, "approved")}
+                                icon={<CheckCircle2 size={17} />}
+                            />
+                            <ActionButton
+                                title="Reject"
+                                color="red"
+                                disabled={updating}
+                                onClick={() => onStatusChange(item._id, "rejected")}
+                                icon={<XCircle size={17} />}
+                            />
+                        </>
+                    )}
+
+                    {item.status === "approved" && (
+                        <ActionButton
+                            title={item.isActive ? "Deactivate" : "Activate"}
+                            color={item.isActive ? "amber" : "green"}
+                            disabled={updating}
+                            onClick={() => onAvailability(item)}
+                            icon={updating ? <Loader2 size={17} className="animate-spin" /> : <Power size={17} />}
+                        />
+                    )}
+
+                    <ActionButton
+                        title="Delete"
+                        color="red"
+                        disabled={deleting}
+                        onClick={onDelete}
+                        icon={<Trash2 size={17} />}
+                    />
+                </div>
+            </td>
+        </tr>
+    );
+});
+
+// Mobile Card
+const MenuItemCard = memo(function MenuItemCard({
+    item,
+    updating,
+    deleting,
+    onStatusChange,
+    onAvailability,
+    onDelete,
+}: {
+    item: MenuItem;
+    updating: boolean;
+    deleting: boolean;
+    onStatusChange: (id: string, status: "approved" | "rejected") => void;
+    onAvailability: (item: MenuItem) => void;
+    onDelete: () => void;
+}) {
+    return (
+        <div className="rounded-xl border border-gray-100 bg-white p-4 transition-shadow duration-200 hover:shadow-md">
+            <div className="flex gap-3">
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                    <Image
+                        src={getImage(item)}
+                        alt={item.itemName}
+                        fill
+                        unoptimized
+                        sizes="80px"
+                        className="object-cover"
+                    />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                    <h3 className="truncate font-bold text-gray-900">
+                        {item.itemName}
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                        {item.businessName || item.vendorName || "Vendor"}
+                    </p>
+                    <p className="mt-1 font-semibold text-orange-600">
+                        ৳{item.price}
+                    </p>
+                    <p className="mt-1 text-xs capitalize text-gray-500">
+                        {item.category}
+                    </p>
+                </div>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+                <StatusBadge status={item.status} />
+                <AvailabilityBadge active={item.isActive} />
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2 border-t border-gray-100 pt-3">
+                {item.status === "pending" && (
+                    <>
+                        <button
+                            type="button"
+                            disabled={updating}
+                            onClick={() => onStatusChange(item._id, "approved")}
+                            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-green-50 px-3 py-2.5 text-xs font-semibold text-green-700 disabled:opacity-50"
+                        >
+                            <CheckCircle2 size={15} />
+                            Approve
+                        </button>
+
+                        <button
+                            type="button"
+                            disabled={updating}
+                            onClick={() => onStatusChange(item._id, "rejected")}
+                            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-red-50 px-3 py-2.5 text-xs font-semibold text-red-700 disabled:opacity-50"
+                        >
+                            <XCircle size={15} />
+                            Reject
+                        </button>
+                    </>
+                )}
+
+                {item.status === "approved" && (
+                    <button
+                        type="button"
+                        disabled={updating}
+                        onClick={() => onAvailability(item)}
+                        className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2.5 text-xs font-semibold text-amber-700 disabled:opacity-50"
+                    >
+                        {updating ? (
+                            <Loader2 size={15} className="animate-spin" />
+                        ) : (
+                            <Power size={15} />
+                        )}
+                        {item.isActive ? "Deactivate" : "Activate"}
+                    </button>
+                )}
+
+                <button
+                    type="button"
+                    disabled={deleting}
+                    onClick={onDelete}
+                    className="flex items-center justify-center gap-1.5 rounded-lg bg-red-50 px-3 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-100 disabled:opacity-50"
+                >
+                    <Trash2 size={15} />
+                    Delete
+                </button>
+            </div>
+        </div>
+    );
+});
+
+function StatusBadge({ status }: { status: MenuItem["status"] }) {
+    return (
+        <span className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${statusStyles[status] || "bg-gray-100 text-gray-600"}`}>
+            {status}
+        </span>
+    );
+}
+
+function AvailabilityBadge({ active }: { active: boolean }) {
+    return (
+        <span className={`text-xs font-semibold ${active ? "text-green-600" : "text-gray-400"}`}>
+            {active ? "Active" : "Inactive"}
+        </span>
     );
 }
 
@@ -735,9 +770,51 @@ function ActionButton({
             aria-label={title}
             disabled={disabled}
             onClick={onClick}
-            className={`rounded-lg p-2 transition disabled:cursor-not-allowed disabled:opacity-50 ${colors[color]}`}
+            className={`rounded-lg p-2 transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50 ${colors[color]}`}
         >
             {icon}
         </button>
+    );
+}
+
+// Loading Skeleton
+export function MenuItemsLoading() {
+    return (
+        <div className="animate-pulse p-5">
+            <div className="hidden lg:block">
+                <div className="mb-5 grid grid-cols-7 gap-4">
+                    {Array.from({ length: 7 }).map((_, index) => (
+                        <div key={index} className="h-4 rounded bg-gray-100" />
+                    ))}
+                </div>
+
+                {Array.from({ length: 6 }).map((_, index) => (
+                    <div
+                        key={index}
+                        className="grid grid-cols-7 items-center gap-4 border-t border-gray-100 py-5"
+                    >
+                        {Array.from({ length: 7 }).map((_, i) => (
+                            <div key={i} className="h-10 rounded-lg bg-gray-100" />
+                        ))}
+                    </div>
+                ))}
+            </div>
+
+            <div className="grid gap-4 lg:hidden">
+                {Array.from({ length: 4 }).map((_, index) => (
+                    <div key={index} className="rounded-xl border border-gray-100 p-4">
+                        <div className="flex gap-3">
+                            <div className="h-20 w-20 rounded-xl bg-gray-100" />
+                            <div className="flex-1 space-y-3">
+                                <div className="h-4 w-3/4 rounded bg-gray-100" />
+                                <div className="h-3 w-1/2 rounded bg-gray-100" />
+                                <div className="h-4 w-1/3 rounded bg-gray-100" />
+                            </div>
+                        </div>
+                        <div className="mt-4 h-8 rounded bg-gray-100" />
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 }
