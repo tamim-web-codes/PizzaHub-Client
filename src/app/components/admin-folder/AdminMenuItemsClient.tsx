@@ -494,7 +494,7 @@ export default function AdminMenuItemsClient({
                                 event.preventDefault();
                                 handleDelete();
                             }}
-                            className="h-11 flex-1 rounded-xl bg-red-600 font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+                            className="h-11 flex-1 rounded-xl mb-4 bg-red-600 font-semibold text-white hover:bg-red-700 disabled:opacity-60"
                         >
                             {deletingId ? (
                                 <>

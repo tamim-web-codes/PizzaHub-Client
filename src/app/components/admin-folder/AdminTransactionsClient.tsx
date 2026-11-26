@@ -127,6 +127,7 @@ export default function AdminTransactionsClient() {
             year: "numeric",
             hour: "2-digit",
             minute: "2-digit",
+            hour12: true,
         });
     };
 
@@ -472,25 +473,7 @@ export default function AdminTransactionsClient() {
                     )}
                 </div>
 
-                {/* Read Only Notice */}
-                <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4">
-                    <AlertCircle
-                        size={19}
-                        className="mt-0.5 shrink-0 text-blue-600"
-                    />
-
-                    <div>
-                        <p className="text-sm font-semibold text-blue-900">
-                            Payment records are read-only
-                        </p>
-
-                        <p className="mt-1 text-xs leading-5 text-blue-700">
-                            Admin can view transaction history but cannot edit
-                            payment amount, change payment status, or delete
-                            payment records.
-                        </p>
-                    </div>
-                </div>
+            
             </div>
         </div>
     );

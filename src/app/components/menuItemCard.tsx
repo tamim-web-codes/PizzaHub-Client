@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,14 +8,13 @@ import { toast } from "sonner";
 import {
     MapPin,
     Loader2,
+    Crown,
 } from "lucide-react";
 
 import { TMenuItemData } from "@/components/types/type";
 import { MenuEditDialoag } from "./MenuEditDialoag";
 import { DeleteMenuItem } from "./MenuDeleteDialoag";
 import { updateMenuAvailability } from "@/lib/actions/orderPost";
-
-
 
 type Props = {
     item: TMenuItemData;
@@ -51,7 +49,6 @@ const MenuItemCard = ({
         try {
             setIsUpdating(true);
 
-            // Backend API call
             const result = await updateMenuAvailability(
                 item._id,
                 vendorId,
@@ -118,6 +115,14 @@ const MenuItemCard = ({
                             </span>
                         </div>
                     )}
+
+                    {/* Premium Badge */}
+                    {item.isPremiumVendor && (
+                        <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-amber-300/70 bg-gradient-to-r from-amber-400 to-yellow-500 px-3 py-1.5 text-xs font-bold text-amber-950 shadow-lg">
+                            <Crown size={14} className="fill-amber-950" />
+                            Premium Vendor
+                        </div>
+                    )}
                 </div>
 
                 {/* Content */}
@@ -172,7 +177,7 @@ const MenuItemCard = ({
                                     aria-checked={isAvailable}
                                     onClick={handleAvailability}
                                     disabled={isUpdating}
-                                    className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors cursor-pointer duration-300 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-60 ${isAvailable
+                                    className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 disabled:cursor-wait disabled:opacity-60 ${isAvailable
                                         ? "bg-emerald-500"
                                         : "bg-slate-300"
                                         }`}

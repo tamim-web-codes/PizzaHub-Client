@@ -6,12 +6,14 @@ export type TMenuItemData = {
   itemName: string;
   category: string;
   description: string;
+  isPremiumVendor:boolean
   price: number;
   location: string;
   ImageUrl?: string;
   images?: string[];
   isPremium?: boolean;
   isActive?:boolean;
+
   
 
   vendor?: {

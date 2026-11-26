@@ -38,7 +38,8 @@ export const myMenuItem = async (
 // ----------------------------------------------------------------------------------------------
 
 export const getMenuBrows = async (
-    query = ""
+    query = "",
+    
 ): Promise<TMenuItemData[]> => {
 
     const res = await fetch(

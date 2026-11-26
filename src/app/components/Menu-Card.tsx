@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -8,14 +7,53 @@ import {
   Eye,
   ArrowUpRight,
   Utensils,
+  Clock,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-
 import { TMenuItemData } from "@/components/types/type";
 import Link from "next/link";
 
 const MenuCard = ({ item }: { item: TMenuItemData }) => {
+
+  // Status Badge Configuration
+  const getStatusBadge = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case "approved":
+        return {
+          label: "Approved",
+          className: "border-green-200 bg-green-100 text-green-700",
+          icon: CheckCircle,
+        };
+
+      case "pending":
+        return {
+          label: "Pending",
+          className: "border-amber-200 bg-amber-100 text-amber-700",
+          icon: Clock,
+        };
+
+      case "rejected":
+        return {
+          label: "Rejected",
+          className: "border-red-200 bg-red-100 text-red-700",
+          icon: XCircle,
+        };
+
+      default:
+        return {
+          label: status || "Unknown",
+          className: "border-slate-200 bg-slate-100 text-slate-600",
+          icon: Clock,
+        };
+    }
+  };
+
+  const statusBadge = getStatusBadge(item.status);
+  const StatusIcon = statusBadge.icon;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -27,6 +65,7 @@ const MenuCard = ({ item }: { item: TMenuItemData }) => {
     >
       {/* Image Section */}
       <div className="relative h-28 shrink-0 overflow-hidden bg-slate-100 sm:h-40 md:h-44 lg:h-48">
+
         <Image
           src={item.ImageUrl as string}
           alt={item.itemName}
@@ -38,19 +77,27 @@ const MenuCard = ({ item }: { item: TMenuItemData }) => {
         {/* Image Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/10" />
 
-        {/* Category */}
-        <Badge className="absolute left-2 top-2 flex items-center gap-1 border-0 bg-white/95 px-2 py-1 text-[9px] font-bold capitalize text-red-600 shadow-sm backdrop-blur-sm sm:left-3 sm:top-3 sm:text-xs">
+        {/* Category - Top Left */}
+        <Badge className="absolute left-2 top-2 z-20 flex items-center gap-1 border-0 bg-white/95 px-2 py-1 text-[9px] font-bold capitalize text-red-600 shadow-sm backdrop-blur-sm sm:left-3 sm:top-3 sm:text-xs">
           <Utensils className="size-3" />
           {item.category}
         </Badge>
 
-        {/* Price */}
-        <div className="absolute bottom-2 right-2 rounded-lg border border-white/50 bg-white px-2.5 py-1.5 text-xs font-extrabold text-red-600 shadow-lg sm:bottom-3 sm:right-3 sm:px-3.5 sm:py-2 sm:text-sm">
+        {/* Status - Bottom Left */}
+        <div
+          className={`absolute bottom-3 left-3 z-30 inline-flex items-center gap-1 rounded-full border px-2.5 py-1.5 text-[9px] font-bold shadow-md backdrop-blur-sm sm:px-3 sm:text-xs ${statusBadge.className}`}
+        >
+          <StatusIcon size={12} />
+          {statusBadge.label}
+        </div>
+
+        {/* Price - Bottom Right */}
+        <div className="absolute bottom-3 right-3 z-20 rounded-lg border border-white/50 bg-white px-2.5 py-1.5 text-xs font-extrabold text-red-600 shadow-lg sm:px-3.5 sm:py-2 sm:text-sm">
           ৳{item.price}
         </div>
 
         {/* Hover Icon */}
-        <div className="absolute right-3 top-3 hidden size-9 items-center justify-center rounded-full bg-white text-red-600 opacity-0 shadow-md transition-all duration-300 group-hover:opacity-100 sm:flex">
+        <div className="absolute right-3 top-3 z-20 hidden size-9 items-center justify-center rounded-full bg-white text-red-600 opacity-0 shadow-md transition-all duration-300 group-hover:opacity-100 sm:flex">
           <ArrowUpRight className="size-5" />
         </div>
       </div>
@@ -79,8 +126,8 @@ const MenuCard = ({ item }: { item: TMenuItemData }) => {
         </div>
 
         {/* Button */}
-        <Link href={`/brows-menu/${item._id}`}
-          type="button"
+        <Link
+          href={`/brows-menu/${item._id}`}
           className="mt-2.5 flex h-8 w-full shrink-0 items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-red-600 to-orange-500 px-2 text-[10px] font-bold text-white shadow-sm transition-all duration-300 hover:from-red-700 hover:to-orange-600 hover:shadow-md sm:mt-3 sm:h-10 sm:gap-2 sm:rounded-xl sm:text-sm"
         >
           <Eye className="size-3.5 shrink-0 sm:size-4" />

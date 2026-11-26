@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -11,9 +10,9 @@ import {
     MapPin,
     ArrowUpDown,
     Filter,
-    ChevronDown,
     ArrowDownWideNarrow,
     ArrowUpNarrowWide,
+    Crown,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -498,7 +497,23 @@ const BrowseMenuClient = ({
                         className="grid grid-cols-2 items-stretch gap-3 sm:gap-5 lg:grid-cols-3 lg:gap-6"
                     >
                         {menuItems.map((item) => (
-                            <MenuCard key={item._id} item={item} />
+                            <div
+                                key={item._id}
+                                className="relative"
+                            >
+                                <MenuCard item={item} />
+
+                                {/* Premium Vendor Badge */}
+                                {item.isPremiumVendor === true && (
+                                    <div className="absolute right-2 top-2 z-20 inline-flex items-center gap-1.5 rounded-full border border-amber-300/70 bg-gradient-to-r from-amber-400 to-yellow-500 px-2.5 py-1.5 text-[10px] font-bold text-amber-950 shadow-lg sm:right-3 sm:top-3 sm:px-3 sm:text-xs">
+                                        <Crown
+                                            size={14}
+                                            className="fill-amber-950"
+                                        />
+                                        Premium
+                                    </div>
+                                )}
+                            </div>
                         ))}
                     </motion.div>
                 )}

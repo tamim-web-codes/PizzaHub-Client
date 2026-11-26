@@ -130,3 +130,16 @@ export const getAdminTransactions = async () => {
 
     return res.json();
 };
+
+
+
+
+export const getAdminOverview = async () => {
+  const res = await fetch(`${BASE_URL}/admin/overview`)
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch admin overview");
+  }
+
+  return res.json();
+};
