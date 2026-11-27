@@ -117,10 +117,10 @@ const MenuItemCard = ({
                     )}
 
                     {/* Premium Badge */}
-                    {item.isPremiumVendor && (
-                        <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-amber-300/70 bg-gradient-to-r from-amber-400 to-yellow-500 px-3 py-1.5 text-xs font-bold text-amber-950 shadow-lg">
+                    {item.isPremiumItem === true && (
+                        <div className="absolute left-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full border border-amber-300/70 bg-gradient-to-r from-amber-400 to-yellow-500 px-3 py-1.5 text-xs font-bold text-amber-950 shadow-lg">
                             <Crown size={14} className="fill-amber-950" />
-                            Premium Vendor
+                            Premium
                         </div>
                     )}
                 </div>

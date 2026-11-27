@@ -14,7 +14,8 @@ export type TMenuItemData = {
   isPremium?: boolean;
   isActive?:boolean;
 
-  
+  isPremiumItem?: boolean;
+
 
   vendor?: {
     _id?: string;

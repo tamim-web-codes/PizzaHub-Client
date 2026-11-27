@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   Sparkles,
   Plus,
+  Crown,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -26,7 +27,6 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { getVendorPremium } from "@/lib/api/user";
 
-
 export type MenuItemData = {
   itemName: string;
   vendorId: string;
@@ -35,6 +35,7 @@ export type MenuItemData = {
   price: number;
   location: string;
   ImageUrl: string;
+  isPremiumItem: boolean;
 };
 
 const AddMenuItemPage = () => {
@@ -44,6 +45,35 @@ const AddMenuItemPage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState("");
+
+  // Vendor Premium Status
+  const [isPremiumVendor, setIsPremiumVendor] = useState(false);
+  const [premiumLoading, setPremiumLoading] = useState(true);
+
+  // Check vendor premium status
+  useEffect(() => {
+    const checkPremiumStatus = async () => {
+      if (!session?.user?.id) {
+        setPremiumLoading(false);
+        return;
+      }
+
+      try {
+        setPremiumLoading(true);
+
+        const premiumUser = await getVendorPremium(session.user.id);
+
+        setIsPremiumVendor(premiumUser?.premium === true);
+      } catch (error) {
+        console.error("Premium status error:", error);
+        setIsPremiumVendor(false);
+      } finally {
+        setPremiumLoading(false);
+      }
+    };
+
+    checkPremiumStatus();
+  }, [session?.user?.id]);
 
   // Image Preview Cleanup
   useEffect(() => {
@@ -99,6 +129,11 @@ const AddMenuItemPage = () => {
       return;
     }
 
+    if (premiumLoading) {
+      toast.error("Please wait while checking your subscription.");
+      return;
+    }
+
     if (!selectedFile) {
       toast.error("Please upload an item image.");
       return;
@@ -137,19 +172,16 @@ const AddMenuItemPage = () => {
         location: formData.get("location") as string,
         vendorId: session.user.id,
         ImageUrl: imageUrl,
+
+        // Premium vendor হলে automatically true
+        isPremiumItem: isPremiumVendor,
       };
 
       // Send Data to Backend
-      // First check vendor premium status
-      const premiumUser = await getVendorPremium(session.user.id);
-
-      console.log("Premium status:", premiumUser);
-
-      // Then add menu item
       const postmenu = await addmenupost(data);
 
-      // Check free user limit
-      if (!premiumUser?.premium && postmenu.limitReached) {
+      // Free user limit check
+      if (postmenu.limitReached) {
         toast.error("Your free menu limit is over. Please upgrade!");
         router.push("/dashboard/vendor/subscription");
         return;
@@ -162,6 +194,7 @@ const AddMenuItemPage = () => {
       }
 
       toast.success("Menu item added successfully!");
+
       router.push("/dashboard/vendor/my-menu-items");
 
     } catch (error) {
@@ -286,13 +319,11 @@ const AddMenuItemPage = () => {
                       <option value="" disabled>
                         Select category
                       </option>
-                      <option value="pizza">Pizza</option>
-                      <option value="burger">Burger</option>
-                      <option value="pasta">Pasta</option>
-                      <option value="sandwich">Sandwich</option>
-                      <option value="appetizer">Appetizer</option>
-                      <option value="dessert">Dessert</option>
-                      <option value="drinks">Drinks</option>
+                      <option value="specialty">Specialty</option>
+                      <option value="meat-lovers">Meat-Lovers</option>
+                      <option value="desserts">Desserts</option>
+                      <option value="vegetarian">Vegetarian</option>
+                      <option value="classic">Classic</option>
                     </select>
                   </div>
                 </div>
@@ -363,6 +394,43 @@ const AddMenuItemPage = () => {
               />
             </div>
 
+            {/* Premium Status Information */}
+            {!premiumLoading && (
+              <div className={`flex items-center gap-3 rounded-xl border p-4 ${isPremiumVendor
+                ? "border-amber-200 bg-amber-50"
+                : "border-slate-200 bg-slate-50"
+                }`}>
+                <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${isPremiumVendor
+                  ? "bg-amber-100 text-amber-600"
+                  : "bg-slate-200 text-slate-500"
+                  }`}>
+                  <Crown size={21} />
+                </div>
+
+                <div>
+                  <p className={`text-sm font-bold ${isPremiumVendor ? "text-amber-700" : "text-slate-700"
+                    }`}>
+                    {isPremiumVendor
+                      ? "Premium Vendor"
+                      : "Free Vendor"}
+                  </p>
+
+                  <p className="mt-1 text-xs text-slate-500">
+                    {isPremiumVendor
+                      ? "Your menu items will automatically receive Premium status."
+                      : "Your menu items will be added with standard status."}
+                  </p>
+                </div>
+
+                {isPremiumVendor && (
+                  <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-amber-200 px-2.5 py-1 text-xs font-bold text-amber-800">
+                    <Crown size={12} />
+                    Premium
+                  </span>
+                )}
+              </div>
+            )}
+
             {/* Image Upload */}
             <div>
               <div className="mb-2 flex items-center justify-between">
@@ -377,7 +445,6 @@ const AddMenuItemPage = () => {
               </div>
 
               {imagePreview ? (
-                /* Image Preview */
                 <div className="rounded-xl border border-slate-200 bg-slate-50 p-2.5">
                   <div className="relative h-44 w-full overflow-hidden rounded-lg bg-slate-100">
                     <Image
@@ -421,7 +488,6 @@ const AddMenuItemPage = () => {
                   </div>
                 </div>
               ) : (
-                /* Upload Area */
                 <label
                   htmlFor="itemImage"
                   className="group flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/70 px-4 py-6 text-center transition hover:border-red-300 hover:bg-red-50/40"
@@ -449,6 +515,7 @@ const AddMenuItemPage = () => {
                 className="sr-only"
               />
             </div>
+
             {/* Buttons */}
             <div className="flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
 
@@ -461,7 +528,7 @@ const AddMenuItemPage = () => {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || premiumLoading}
                 className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-orange-500 px-6 text-sm font-bold text-white shadow-md shadow-red-200 transition hover:from-red-700 hover:to-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? (

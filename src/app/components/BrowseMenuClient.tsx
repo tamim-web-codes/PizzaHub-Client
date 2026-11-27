@@ -39,11 +39,13 @@ type Props = {
 };
 
 const categories = [
-    "pizza",
-    "burger",
-    "pasta",
-    "snacks",
-    "drinks",
+    'specialty',
+    'meat-lovers',
+    'desserts',
+    'vegetarian',
+    'classic',
+
+
 ];
 
 const BrowseMenuClient = ({
@@ -504,7 +506,7 @@ const BrowseMenuClient = ({
                                 <MenuCard item={item} />
 
                                 {/* Premium Vendor Badge */}
-                                {item.isPremiumVendor === true && (
+                                {item.isPremiumItem === true && (
                                     <div className="absolute right-2 top-2 z-20 inline-flex items-center gap-1.5 rounded-full border border-amber-300/70 bg-gradient-to-r from-amber-400 to-yellow-500 px-2.5 py-1.5 text-[10px] font-bold text-amber-950 shadow-lg sm:right-3 sm:top-3 sm:px-3 sm:text-xs">
                                         <Crown
                                             size={14}

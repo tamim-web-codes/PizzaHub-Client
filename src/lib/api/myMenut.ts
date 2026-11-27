@@ -1,4 +1,4 @@
-
+'use server'
 
 import { TMenuItemData } from "@/components/types/type";
 import { auth } from "../auth";
@@ -82,4 +82,22 @@ export const getMenuDetails = async (
   }
 
   return res.json();
+};
+
+
+
+
+
+export const getFeaturedMenuItems = async () => {
+    const res = await fetch(`${BASE_URL}/featured-menu`, {
+        cache: "no-store",
+    });
+
+    if (!res.ok) {
+        throw new Error("Failed to fetch featured menu items");
+    }
+
+    const data = await res.json();
+
+    return data.result;
 };
