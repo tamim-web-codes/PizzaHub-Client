@@ -1,17 +1,14 @@
+'use server'
 import { OrderPostData } from "@/components/types/type";
+import { getToken, protectedMutation } from "../core/server";
 
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 
 export const addOrderPost = async(data:OrderPostData)=>{
-const res = await fetch(`${BASE_URL}/order-now`,{
-    method:'POST',
-    headers:{
-       "Content-Type": "application/json",
-    },
-    body:JSON.stringify(data)
-})
+    const api = `${BASE_URL}/order-now`
+const res = await protectedMutation(api,'POST',data)
 
   if (!res.ok) {
     throw new Error("Failed to add menu item");
@@ -30,13 +27,8 @@ export const updateCustomerProfile = async (
   id: string,
   data: UpdateProfileData
 ) => {
-  const res = await fetch(`${BASE_URL}/update-customer-profile/${id}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+    const api = `${BASE_URL}/update-customer-profile/${id}`
+  const res = await protectedMutation(api,'PATCH',data)
 
   const result = await res.json();
 
@@ -49,15 +41,8 @@ export const updateCustomerProfile = async (
 
 
 export const cancelCustomerOrder = async (orderId: string) => {
-    const res = await fetch(
-        `${BASE_URL}/order-canceld/${orderId}`,
-        {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        }
-    );
+    const api =   `${BASE_URL}/order-canceld/${orderId}`
+    const res = await protectedMutation(api,'PATCH')
 
     const result = await res.json();
 
@@ -69,18 +54,19 @@ export const cancelCustomerOrder = async (orderId: string) => {
 };
 
 
-
 export const updateCustomerOrderStatus = async (
     orderId: string,
     vendorId: string,
     status: "pending" | "accepted" | "rejected"
 ) => {
+    const token = await getToken()
     const res = await fetch(
         `${BASE_URL}/vendor-to-customer-status/${orderId}`,
         {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
+                 authorization : `Bearer ${token}`
             },
             body: JSON.stringify({
                 vendorId,
@@ -106,12 +92,14 @@ export const updateMenuAvailability = async (
     vendorId: string,
     isActive: boolean
 ) => {
+    const token = await getToken()
     const res = await fetch(
         `${BASE_URL}/menu/availability/${id}`,
         {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
+                authorization:`Bearer ${token}`
             },
             body: JSON.stringify({
                 vendorId,
@@ -131,12 +119,8 @@ export const updateMenuAvailability = async (
 
 
 export const getVendorCustomerOverview = async (vendorId: string) => {
-    const res = await fetch(
-        `${BASE_URL}/vendor-overview/${vendorId}`,
-        {
-            cache: "no-store",
-        }
-    );
+    const api =  `${BASE_URL}/vendor-overview/${vendorId}`
+    const res = await protectedMutation(api)
 
     const data = await res.json();
 
@@ -149,13 +133,8 @@ export const getVendorCustomerOverview = async (vendorId: string) => {
 
 // --------------------------------------------------------------------------
 export const getCustomerOrderOverview = async (customerId: string) => {
-    const res = await fetch(
-        `${BASE_URL}/customer-order-overview/${customerId}`,
-        {
-            method: "GET",
-            cache: "no-store",
-        }
-    );
+    const api = `${BASE_URL}/customer-order-overview/${customerId}`
+    const res = await protectedMutation(api)
 
     const data = await res.json();
 

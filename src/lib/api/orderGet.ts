@@ -1,9 +1,10 @@
+import { protectedMutation } from "../core/server";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 export const getCustomerOrder= async(customerEmail:string)=>{
-
-const res = await fetch(`${BASE_URL}/order-now/${customerEmail}`,)
+const api = `${BASE_URL}/order-now/${customerEmail}`
+const res = await protectedMutation(api)
 
   if (!res.ok) {
     throw new Error("Order fetch filde ");

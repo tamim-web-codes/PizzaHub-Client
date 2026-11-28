@@ -236,12 +236,7 @@ const Feature = () => {
                     >
                         {items.map((item) => {
                             // Find available image URL
-                            const imageUrl =
-                                item.imageUrl ||
-                                item.image ||
-                                item.images?.[0] ||
-                                item.itemImage ||
-                                "/default-pizza.jpg";
+                      
 
                             // Status information
                             const statusInfo = getStatusInfo(

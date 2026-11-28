@@ -30,6 +30,7 @@ type User = {
     isBlocked?: boolean;
     businessName?: string;
     subscriptionPlan?: "free" | "premium";
+    premium?: boolean;
 };
 
 const containerVariants = {
@@ -412,17 +413,15 @@ const ManageUsers = () => {
                                                     <td className="px-5 py-4">
                                                         {user.role === "vendor" ? (
                                                             <span
-                                                                className={`text-xs font-semibold capitalize ${user.subscriptionPlan === "premium"
-                                                                    ? "text-amber-600"
-                                                                    : "text-gray-500"
+                                                                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${user.premium === true
+                                                                    ? "bg-amber-100 text-amber-700"
+                                                                    : "bg-gray-100 text-gray-600"
                                                                     }`}
                                                             >
-                                                                {user.subscriptionPlan || "free"}
+                                                                {user.premium === true ? "Premium" : "Free"}
                                                             </span>
                                                         ) : (
-                                                            <span className="text-xs text-gray-400">
-                                                                —
-                                                            </span>
+                                                            <span className="text-xs text-gray-400">—</span>
                                                         )}
                                                     </td>
 

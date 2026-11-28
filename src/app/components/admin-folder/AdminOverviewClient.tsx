@@ -36,7 +36,7 @@ const initialOverview: OverviewData = {
     totalTransactions: 0,
 };
 
-const AdminOverviewClient = () => {
+const AdminOverviewClient = ({ result }) => {
     const [overview, setOverview] =
         useState<OverviewData>(initialOverview);
 
@@ -49,7 +49,7 @@ const AdminOverviewClient = () => {
             setLoading(true);
             setError("");
 
-            const result = await getAdminOverview();
+
 
             if (!result.success) {
                 throw new Error(

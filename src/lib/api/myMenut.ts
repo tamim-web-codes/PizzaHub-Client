@@ -3,10 +3,9 @@
 import { TMenuItemData } from "@/components/types/type";
 import { auth } from "../auth";
 import { headers } from "next/headers";
-
+import { protectedMutation } from "../core/server";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
-
 
 export const myMenuItem = async (
     query = ""
@@ -71,10 +70,8 @@ export type MenuDetailsData = TMenuItemData & {
 export const getMenuDetails = async (
   id: string
 ): Promise<MenuDetailsData | null> => {
-  const res = await fetch(`${BASE_URL}/brows-menu/${id}`, {
-    cache: "no-store",
-  });
-
+    const api = `${BASE_URL}/brows-menu/${id}`
+  const res = await protectedMutation(api,)
 
 
   if (!res.ok) {

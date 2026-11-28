@@ -1,5 +1,8 @@
-import { MenuItemData } from "@/app/dashboard/vendor/add-menu-item/page"
+'use server'
+
 import { TMenuItemData } from "@/components/types/type";
+import { protectedMutation } from "../core/server";
+import { MenuItemData } from "@/app/components/AddMenuItemClient";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
@@ -7,28 +10,16 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 
 export const addmenupost = async (data: MenuItemData) => {
-    const res = await fetch(`${BASE_URL}/add-menu/count`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-    });
-
-    const result = await res.json();
-
-    return result;
+  const api = `${BASE_URL}/add-menu/count`
+    const res = await protectedMutation(api,'POST',data)
+  
+    return res.json()
 };
 
 
 export const updateMenuItem = async(id:string,data: Partial<TMenuItemData>)=>{
-const res = await fetch(`${BASE_URL}/edit-menu/${id}`,{
-    method:'PATCH',
-    headers:{
-       "Content-Type": "application/json",
-    },
-    body:JSON.stringify(data)
-})
+  const api = `${BASE_URL}/edit-menu/${id}`
+const res = await protectedMutation(api,'PATCH',data)
 
   if (!res.ok) {
     throw new Error("Failed to add menu item");
@@ -39,10 +30,8 @@ const res = await fetch(`${BASE_URL}/edit-menu/${id}`,{
 
 
 export const deletMenuItem = async(id:string)=>{
-const res = await fetch(`${BASE_URL}/delete-menu/${id}`,{
-    method:'DELETE',
-
-})
+  const api = `${BASE_URL}/delete-menu/${id}`
+const res = await protectedMutation(api,'DELETE',)
 
   if (!res.ok) {
     throw new Error("Failed to add menu item");
@@ -62,13 +51,8 @@ export const updateProfile = async (
   userId: string,
   data: ProfileUpdateData
 ) => {
-  const res = await fetch(`${BASE_URL}/vendor-edit-profile/${userId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+  const api = `${BASE_URL}/vendor-edit-profile/${userId}`
+  const res = await protectedMutation(api,"PATCH",data)
 
   if (!res.ok) {
     throw new Error("Failed to update profile");

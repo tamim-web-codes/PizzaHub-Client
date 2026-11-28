@@ -72,17 +72,17 @@ const cardVariants = {
     },
 };
 
-const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
+const VendorOrders = ({ vendorId, data }: VendorOrdersProps) => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
-
+    console.log(vendorId);
     // Fetch vendor orders
     const fetchOrders = useCallback(async () => {
         try {
             setLoading(true);
 
-            const data = await getVendorCustomerOrders(vendorId);
+
 
             setOrders(Array.isArray(data) ? data : []);
         } catch (err) {
@@ -90,7 +90,7 @@ const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
                 err instanceof Error
                     ? err.message
                     : "Something went wrong";
-
+            console.log(err);
             toast.error(message);
         } finally {
             setLoading(false);
@@ -171,7 +171,7 @@ const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
             </div>
         );
     }
-
+    console.log(orders);
     return (
         <div className="min-h-screen w-full bg-white px-3 py-6 sm:px-6 sm:py-8 lg:px-8">
             <div className="mx-auto max-w-6xl">
@@ -473,3 +473,4 @@ const VendorOrders = ({ vendorId }: VendorOrdersProps) => {
 };
 
 export default VendorOrders;
+

@@ -7,40 +7,47 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 const categories = [
-       {
-        id: "specialty",
-        name: "Specialty",
-        description: "Discover our unique gourmet creations.",
-        image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800",
-        label: "Premium Selection",
+    {
+        id: "Classic Pizzas",
+        name: "Classic Pizzas",
+        description: "Enjoy timeless and traditional pizza favorites.",
+        image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800",
+        label: "Traditional Favorites",
     },
     {
-        id: "meat-lovers",
-        name: "Meat-Lovers",
-        description: "Loaded with delicious meat toppings.",
-        image: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=800",
-        label: "Rich & Flavorful",
-    },
-    {
-        id: "desserts",
-        name: "Desserts",
-        description: "Sweet treats to make your day better.",
-        image: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=800",
-        label: "Sweet Treats",
-    },
-    {
-        id: "vegetarian",
-        name: "Vegetarian",
+        id: "Vegetarian Pizzas",
+        name: "Vegetarian Pizzas",
         description: "Fresh vegetables and delicious flavors.",
         image: "https://images.unsplash.com/photo-1571407970349-bc81e7e96d47?w=800",
         label: "Fresh & Healthy",
     },
     {
-        id: "classic",
-        name: "Classic",
-        description: "Enjoy timeless and traditional favorites.",
-        image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800",
-        label: "Traditional Favorites",
+        id: "Meat Lovers",
+        name: "Meat Lovers",
+        description: "Loaded with delicious meat toppings.",
+        image: "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=800",
+        label: "Rich & Flavorful",
+    },
+    {
+        id: "Specialty/Gourmet Pizzas",
+        name: "Specialty/Gourmet Pizzas",
+        description: "Discover our unique gourmet creations.",
+        image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800",
+        label: "Premium Selection",
+    },
+    {
+        id: "Sides & Appetizers",
+        name: "Sides & Appetizers",
+        description: "Enjoy tasty sides and delicious appetizers.",
+        image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=800",
+        label: "Perfect Side Dishes",
+    },
+    {
+        id: "Beverages & Desserts",
+        name: "Beverages & Desserts",
+        description: "Refresh yourself with drinks and sweet treats.",
+        image: "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=800",
+        label: "Sweet & Refreshing",
     },
 ];
 
@@ -87,7 +94,7 @@ export default function PizzaCategories() {
 
                     <p className="mx-auto mt-3 max-w-2xl text-xs leading-6 text-gray-500 sm:mt-4 sm:text-base sm:leading-7">
                         Discover a wide variety of delicious foods.
-                        From classic pizzas to tasty burgers and sweet
+                        From classic pizzas to tasty sides and sweet
                         desserts, find something you will love.
                     </p>
                 </div>
@@ -112,13 +119,12 @@ export default function PizzaCategories() {
                                 className="block h-full overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:border-orange-200 hover:shadow-lg sm:rounded-2xl"
                             >
                                 {/* Image */}
-                                {/* Image */}
                                 <div className="relative h-36 overflow-hidden bg-gray-100 sm:h-48 lg:h-56 xl:h-64">
                                     <Image
                                         src={category.image}
                                         alt={category.name}
                                         fill
-                                        sizes="(max-width: 640px) 33vw, (max-width: 1024px) 33vw, 25vw"
+                                        sizes="(max-width: 640px) 33vw, 33vw"
                                         className="object-cover transition-transform duration-700 group-hover:scale-110"
                                     />
 

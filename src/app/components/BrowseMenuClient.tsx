@@ -39,11 +39,12 @@ type Props = {
 };
 
 const categories = [
-    'specialty',
-    'meat-lovers',
-    'desserts',
-    'vegetarian',
-    'classic',
+    "Classic Pizzas",
+    "Vegetarian Pizzas",
+    "Meat Lovers",
+    "Specialty/Gourmet Pizzas",
+    "Sides & Appetizers",
+    "Beverages & Desserts"
 
 
 ];
